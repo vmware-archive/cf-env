@@ -1,0 +1,55 @@
+{
+  "cloudamqp": [
+    {
+      "credentials": {
+        "uri": "amqp://bxgflcee:xxxxxxxx@turtle.rmq.cloudamqp.com/bxgflcee"
+      },
+      "label": "cloudamqp",
+      "name": "myapp-mq",
+      "plan": "lemur",
+      "tags": [
+        "Cloud Databases",
+        "Developer Tools",
+        "Messaging and Queuing",
+        "amqp",
+        "Backup",
+        "Messaging",
+        "New Product",
+        "IT Management",
+        "rabbitmq"
+      ]
+    }
+  ],
+  "elephantsql": [
+    {
+      "credentials": {
+        "max_conns": "5",
+        "uri": "postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm"
+      },
+      "label": "elephantsql",
+      "name": "myapp-db",
+      "plan": "turtle",
+      "tags": [
+        "Data Stores",
+        "Cloud Databases",
+        "Developer Tools",
+        "Data Store",
+        "postgresql",
+        "relational",
+        "New Product"
+      ]
+    }
+  ],
+  "user-provided": [
+    {
+      "credentials": {
+        "coolness": "pretty cool",
+        "uri": "https://duckduckgo.com/"
+      },
+      "label": "user-provided",
+      "name": "search-engine",
+      "syslog_drain_url": "",
+      "tags": []
+    }
+  ]
+}

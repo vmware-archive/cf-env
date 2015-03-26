@@ -12,20 +12,11 @@ public class CloudFoundryEnvironment {
     public static final String VCAP_SERVICES = "VCAP_SERVICES";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private String serviceName;
-    private String serviceUri;
+    private JsonNode rootNode;
 
     public CloudFoundryEnvironment(Environment environment) throws JsonProcessingException {
         String vcapServices = environment.lookup(VCAP_SERVICES);
-        JsonNode rootNode = parse(vcapServices);
-
-        try {
-            serviceName = getServiceName(rootNode);
-            serviceUri = getServiceUri(rootNode);
-        } catch (NoSuchElementException ex) {
-            serviceName = null;
-            serviceUri = null;
-        }
+        this.rootNode = parse(vcapServices);
     }
 
     private JsonNode parse(String json) throws JsonProcessingException {
@@ -34,19 +25,6 @@ public class CloudFoundryEnvironment {
         } catch (IOException e) {
             throw asJsonProcessingException(e);
         }
-    }
-
-    private String getServiceUri(JsonNode rootNode) {
-        return getServiceNode(rootNode).get("credentials").get("uri").asText();
-    }
-
-    private String getServiceName(JsonNode rootNode) {
-        return getServiceNode(rootNode).get("name").asText();
-    }
-
-    private JsonNode getServiceNode(JsonNode rootNode) throws NoSuchElementException {
-        Iterator<Map.Entry<String, JsonNode>> iterator = rootNode.fields();
-        return iterator.next().getValue().get(0);
     }
 
     private JsonProcessingException asJsonProcessingException(IOException e) {
@@ -60,10 +38,41 @@ public class CloudFoundryEnvironment {
     }
 
     public String getName() {
-        return serviceName;
+        JsonNode serviceNode = getServiceNodeFromRootNode();
+        return getServiceNameFromServiceNode(serviceNode);
     }
 
     public String getUri() {
-        return serviceUri;
+        JsonNode serviceNode = getServiceNodeFromRootNode();
+        return getServiceUriFromServiceNode(serviceNode);
     }
+
+    public String getNameFor(String serviceType) {
+        JsonNode serviceNode = getServiceNodeFromRootNodeByServiceType(serviceType);
+        return getServiceNameFromServiceNode(serviceNode);
+    }
+
+    public String getUriFor(String serviceType) {
+        JsonNode serviceNode = getServiceNodeFromRootNodeByServiceType(serviceType);
+        return getServiceUriFromServiceNode(serviceNode);
+    }
+
+    private JsonNode getServiceNodeFromRootNodeByServiceType(String serviceType) {
+        JsonNode serviceTypeNode = rootNode.get(serviceType);
+        return serviceTypeNode.get(0);
+    }
+
+    private JsonNode getServiceNodeFromRootNode() throws NoSuchElementException {
+        JsonNode serviceTypeNode = rootNode.fields().next().getValue();
+        return serviceTypeNode.get(0);
+    }
+
+    private String getServiceNameFromServiceNode(JsonNode serviceNode) {
+        return serviceNode.get("name").asText();
+    }
+
+    private String getServiceUriFromServiceNode(JsonNode serviceNode) {
+        return serviceNode.get("credentials").get("uri").asText();
+    }
+
 }
