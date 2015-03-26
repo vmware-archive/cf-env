@@ -1,0 +1,7 @@
+This is a small Java library for parsing the Cloud Foundry environment variables (VCAP_SERVICES and so on).
+
+Build with Gradle:
+
+--------------------------------------
+./gradlew build
+--------------------------------------
