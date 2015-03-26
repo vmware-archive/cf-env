@@ -3,18 +3,20 @@ package io.pivotal.labs.cfenv;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
+import java.io.InputStreamReader;
 
 public class ResourceUtils {
 
     public static String loadResource(String name) throws IOException {
         try (InputStream stream = openResource(name)) {
-            Scanner scanner = new Scanner(stream, StandardCharsets.UTF_8.name()).useDelimiter("\\z");
-            String content = scanner.next();
-            IOException exception = scanner.ioException();
-            if (exception != null) throw exception;
-            return content;
+            StringBuilder buffer = new StringBuilder();
+            InputStreamReader reader = new InputStreamReader(stream);
+            while (true) {
+                int character = reader.read();
+                if (character == -1) break;
+                buffer.append((char) character);
+            }
+            return buffer.toString();
         }
     }
 
