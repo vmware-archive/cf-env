@@ -1,6 +1,7 @@
 package io.pivotal.labs.cfenv;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 
 public class CloudFoundryEnvironmentTests {
 
@@ -30,23 +32,19 @@ public class CloudFoundryEnvironmentTests {
     }
 
     @Test
-    public void shouldParseASystemService() throws Exception {
+    public void shouldGetServiceName() throws Exception {
         String json = ResourceUtils.loadResource("system_service.json");
-
         CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environment("VCAP_SERVICES", json));
-        Set<String> serviceNames = environment.getServiceNames();
 
-        assertThat(serviceNames, contains("myapp-db"));
+        assertThat(environment.getName(), equalTo("myapp-db"));
     }
 
     @Test
-    public void shouldParseAUserProvidedService() throws Exception {
-        String json = ResourceUtils.loadResource("user_provided_service.json");
-
+    public void shouldGetServiceUri() throws Exception {
+        String json = ResourceUtils.loadResource("system_service.json");
         CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environment("VCAP_SERVICES", json));
-        Set<String> serviceNames = environment.getServiceNames();
 
-        assertThat(serviceNames, contains("search-engine"));
+        assertThat(environment.getUri(), equalTo("postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm"));
     }
 
     private Environment environment(String name, String value) {
