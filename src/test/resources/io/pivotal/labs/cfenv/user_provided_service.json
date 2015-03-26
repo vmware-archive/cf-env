@@ -1,0 +1,14 @@
+{
+  "user-provided": [
+    {
+      "credentials": {
+        "coolness": "pretty cool",
+        "uri": "https://duckduckgo.com/"
+      },
+      "label": "user-provided",
+      "name": "search-engine",
+      "syslog_drain_url": "",
+      "tags": []
+    }
+  ]
+}

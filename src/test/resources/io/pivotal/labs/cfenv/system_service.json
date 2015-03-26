@@ -1,0 +1,22 @@
+{
+  "elephantsql": [
+    {
+      "credentials": {
+        "max_conns": "5",
+        "uri": "postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm"
+      },
+      "label": "elephantsql",
+      "name": "myapp-db",
+      "plan": "turtle",
+      "tags": [
+        "Data Stores",
+        "Cloud Databases",
+        "Developer Tools",
+        "Data Store",
+        "postgresql",
+        "relational",
+        "New Product"
+      ]
+    }
+  ]
+}
