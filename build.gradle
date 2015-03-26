@@ -1,0 +1,23 @@
+plugins {
+  id 'java'
+  id 'idea'
+}
+
+assert gradle.gradleVersion == '2.3'
+
+sourceCompatibility = '1.8'
+
+version = '0.0.1'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+idea.module {
+  outputDir = file('.idea/classes/main')
+  testOutputDir = file('.idea/classes/test')
+}
