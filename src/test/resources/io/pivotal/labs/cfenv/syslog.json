@@ -1,0 +1,11 @@
+{
+  "user-provided": [
+    {
+      "credentials": {},
+      "label": "user-provided",
+      "name": "false-syslog",
+      "syslog_drain_url": "syslog://example.invalid",
+      "tags": []
+    }
+  ]
+}
