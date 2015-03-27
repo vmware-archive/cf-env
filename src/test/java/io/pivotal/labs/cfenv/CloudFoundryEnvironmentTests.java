@@ -49,22 +49,6 @@ public class CloudFoundryEnvironmentTests {
     }
 
     @Test
-    public void shouldParseTheUriFromASystemService() throws Exception {
-        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json"));
-        URI uri = environment.getUri("myapp-db");
-
-        assertThat(uri, equalTo(URI.create("postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm")));
-    }
-
-    @Test
-    public void shouldParseTheUriFromAUserProvidedService() throws Exception {
-        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("user_provided_service.json"));
-        URI uri = environment.getUri("search-engine");
-
-        assertThat(uri, equalTo(URI.create("https://duckduckgo.com/")));
-    }
-
-    @Test
     public void shouldTolerateAServiceWithNoUri() throws Exception {
         new CloudFoundryEnvironment(environmentWithVcapServices("syslog.json"));
     }
@@ -72,13 +56,6 @@ public class CloudFoundryEnvironmentTests {
     @Test
     public void shouldTolerateAServiceWithAMalformedUri() throws Exception {
         new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("postgres://", "postgres:||")));
-    }
-
-    @Test(expected = URISyntaxException.class)
-    public void shouldNotRevealAMalformedUri() throws Exception {
-        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("postgres://", "postgres:||")));
-
-        environment.getUri("myapp-db");
     }
 
     @Test
@@ -103,6 +80,13 @@ public class CloudFoundryEnvironmentTests {
         assertThat(service.getPlan(), nullValue());
         assertThat(service.getTags(), empty());
         assertThat(service.getUri(), equalTo(URI.create("https://duckduckgo.com/")));
+    }
+
+    @Test(expected = URISyntaxException.class)
+    public void shouldNotRevealAMalformedUri() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("postgres://", "postgres:||")));
+
+        environment.getService("myapp-db").getUri();
     }
 
     private Environment environmentWithVcapServices(String jsonResourceName) throws IOException {

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,10 +63,6 @@ public class CloudFoundryEnvironment {
 
     public CloudFoundryService getService(String serviceName) {
         return services.get(serviceName);
-    }
-
-    public URI getUri(String serviceName) throws URISyntaxException {
-        return getService(serviceName).getUri();
     }
 
 }
