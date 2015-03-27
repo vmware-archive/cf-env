@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -85,6 +86,20 @@ public class CloudFoundryEnvironmentTests {
     @Test(expected = URISyntaxException.class)
     public void shouldNotRevealAMalformedUri() throws Exception {
         CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("postgres://", "postgres:||")));
+
+        environment.getService("myapp-db").getUri();
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void shouldThrowAnExceptionOnANonexistentService() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environment("VCAP_SERVICES", "{}"));
+
+        environment.getService("no such service");
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void shouldThrowAnExceptionOnANonexistentUri() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("uri", "href")));
 
         environment.getService("myapp-db").getUri();
     }

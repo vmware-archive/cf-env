@@ -2,6 +2,7 @@ package io.pivotal.labs.cfenv;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class CloudFoundryService {
@@ -37,8 +38,8 @@ public class CloudFoundryService {
     }
 
     public URI getUri() throws URISyntaxException {
+        if (uri == null) throw new NoSuchElementException("no uri in service: " + name);
         return new URI(uri);
     }
 
 }
-

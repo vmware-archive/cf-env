@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public class CloudFoundryEnvironment {
@@ -62,7 +59,9 @@ public class CloudFoundryEnvironment {
     }
 
     public CloudFoundryService getService(String serviceName) {
-        return services.get(serviceName);
+        CloudFoundryService service = services.get(serviceName);
+        if (service == null) throw new NoSuchElementException("no such service: " + serviceName);
+        return service;
     }
 
 }
