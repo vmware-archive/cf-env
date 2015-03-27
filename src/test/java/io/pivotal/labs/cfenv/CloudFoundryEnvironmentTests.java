@@ -67,7 +67,7 @@ public class CloudFoundryEnvironmentTests {
         assertThat(service.getName(), equalTo("myapp-db"));
         assertThat(service.getLabel(), equalTo("elephantsql"));
         assertThat(service.getPlan(), equalTo("turtle"));
-        assertThat(service.getTags(), contains("Data Stores", "Cloud Databases", "Developer Tools", "Data Store", "postgresql", "relational", "New Product"));
+        assertThat(service.getTags(), containsInAnyOrder("Data Stores", "Cloud Databases", "Developer Tools", "Data Store", "postgresql", "relational", "New Product"));
         assertThat(service.getUri(), equalTo(URI.create("postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm")));
     }
 
