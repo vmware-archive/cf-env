@@ -1,22 +1,16 @@
 package io.pivotal.labs.cfenv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 @FunctionalInterface
 public interface Environment {
 
     public String get(String name);
 
-    public default String lookup(String name) throws JsonProcessingException {
+    public default String lookup(String name) throws CloudFoundryEnvironmentException {
         String value = get(name);
-        if (value == null) throw new MissingEnvironmentVariableException(name);
-        return value;
-    }
-
-    public class MissingEnvironmentVariableException extends JsonProcessingException {
-        public MissingEnvironmentVariableException(String message) {
-            super(message);
+        if (value == null || value.isEmpty()) {
+            throw new CloudFoundryEnvironmentException("environment variable not defined: " + name);
         }
+        return value;
     }
 
 }

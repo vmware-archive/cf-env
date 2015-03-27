@@ -1,6 +1,5 @@
 package io.pivotal.labs.cfenv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,7 +14,7 @@ public class CloudFoundryEnvironment {
 
     private final Set<String> serviceNames = new HashSet<>();
 
-    public CloudFoundryEnvironment(Environment environment) throws JsonProcessingException {
+    public CloudFoundryEnvironment(Environment environment) throws CloudFoundryEnvironmentException {
 
         String vcapServices = environment.lookup(VCAP_SERVICES);
 
@@ -33,22 +32,12 @@ public class CloudFoundryEnvironment {
         return serviceNames;
     }
 
-    private JsonNode parse(String json) throws JsonProcessingException {
+    private JsonNode parse(String json) throws CloudFoundryEnvironmentException {
         try {
             return OBJECT_MAPPER.readTree(json);
         } catch (IOException e) {
-            throw asJsonProcessingException(e);
+            throw new CloudFoundryEnvironmentException("error parsing JSON: " + json, e);
         }
-    }
-
-    private JsonProcessingException asJsonProcessingException(IOException e) {
-        class UnexpectedIOException extends JsonProcessingException {
-            public UnexpectedIOException(IOException e) {
-                super(e);
-            }
-        }
-
-        return e instanceof JsonProcessingException ? (JsonProcessingException) e : new UnexpectedIOException(e);
     }
 
 }

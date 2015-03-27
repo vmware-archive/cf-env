@@ -1,6 +1,5 @@
 package io.pivotal.labs.cfenv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -19,12 +18,12 @@ public class CloudFoundryEnvironmentTests {
         new CloudFoundryEnvironment(environment);
     }
 
-    @Test(expected = JsonProcessingException.class)
+    @Test(expected = CloudFoundryEnvironmentException.class)
     public void shouldThrowAnExceptionOnAMissingVariable() throws Exception {
         new CloudFoundryEnvironment(environment("NOT_VCAP_SERVICES", "{}"));
     }
 
-    @Test(expected = JsonProcessingException.class)
+    @Test(expected = CloudFoundryEnvironmentException.class)
     public void shouldThrowAnExceptionOnInvalidJson() throws Exception {
         new CloudFoundryEnvironment(environment("VCAP_SERVICES", "<json>ceci n'est pas de JSON</json>"));
     }
