@@ -7,11 +7,11 @@ import java.util.Set;
 
 public class CloudFoundryService {
 
-    private String name;
-    private String label;
-    private String plan;
-    private Set<String> tags;
-    private String uri;
+    private final String name;
+    private final String label;
+    private final String plan;
+    private final Set<String> tags;
+    private final String uri;
 
     public CloudFoundryService(String name, String label, String plan, Set<String> tags, String uri) {
         this.name = name;
