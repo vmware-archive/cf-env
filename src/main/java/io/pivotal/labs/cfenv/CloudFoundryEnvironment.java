@@ -40,8 +40,8 @@ public class CloudFoundryEnvironment {
         String label = serviceInstanceNode.get("label").asText();
         String plan = asOptional(serviceInstanceNode.get("plan"), JsonNode::asText);
         Set<String> tags = asSet(serviceInstanceNode.get("tags"), JsonNode::asText);
-        String uri = asOptional(serviceInstanceNode.get("credentials").get("uri"), JsonNode::asText);
-        return new CloudFoundryService(name, label, plan, tags, uri);
+        Map<String, Object> credentials = asMap(serviceInstanceNode.get("credentials"), JsonNode::asText);
+        return new CloudFoundryService(name, label, plan, tags, credentials);
     }
 
     private <E> E asOptional(JsonNode node, Function<JsonNode, E> conversion) {
@@ -52,6 +52,12 @@ public class CloudFoundryEnvironment {
         Set<E> set = new HashSet<>();
         node.forEach(child -> set.add(conversion.apply(child)));
         return set;
+    }
+
+    private <E> Map<String, E> asMap(JsonNode node, Function<JsonNode, E> conversion) {
+        HashMap<String, E> map = new HashMap<>();
+        node.fields().forEachRemaining(entry -> map.put(entry.getKey(), conversion.apply(entry.getValue())));
+        return map;
     }
 
     public Set<String> getServiceNames() {

@@ -1,14 +1,13 @@
 package io.pivotal.labs.cfenv;
 
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -83,6 +82,14 @@ public class CloudFoundryEnvironmentTests {
         assertThat(service.getUri(), equalTo(URI.create("https://duckduckgo.com/")));
     }
 
+    @Test
+    public void shouldParseTheCredentialsOfAService() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json"));
+        CloudFoundryService service = environment.getService("myapp-db");
+
+        assertThat(service.getCredentials(), entries(containsInAnyOrder(entry("uri", "postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm"), entry("max_conns", "5"))));
+    }
+
     @Test(expected = URISyntaxException.class)
     public void shouldNotRevealAMalformedUri() throws Exception {
         CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("postgres://", "postgres:||")));
@@ -117,6 +124,19 @@ public class CloudFoundryEnvironmentTests {
     private Environment environment(String name, String value) {
         Map<String, String> environment = Collections.singletonMap(name, value);
         return environment::get;
+    }
+
+    private <K, V> Matcher<Map<K, V>> entries(Matcher<Iterable<? extends Map.Entry<K, V>>> matcher) {
+        return new FeatureMatcher<Map<K, V>, Set<Map.Entry<K, V>>>(matcher, "entries", "entries") {
+            @Override
+            protected Set<Map.Entry<K, V>> featureValueOf(Map<K, V> actual) {
+                return actual.entrySet();
+            }
+        };
+    }
+
+    private <K, V> Map.Entry<K, V> entry(K key, V value) {
+        return new AbstractMap.SimpleImmutableEntry<K, V>(key, value);
     }
 
 }
