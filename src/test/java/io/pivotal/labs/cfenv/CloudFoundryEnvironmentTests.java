@@ -90,6 +90,26 @@ public class CloudFoundryEnvironmentTests {
         assertThat(service.getCredentials(), entries(containsInAnyOrder(entry("uri", "postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm"), entry("max_conns", "5"))));
     }
 
+    @Test
+    public void shouldParseCredentialsContainingVariousTypes() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("syslog.json", json -> json.replace("{}",
+                "{" +
+                        "\"boolean\": true," +
+                        "\"int\": 23," +
+                        "\"float\": 3.14," +
+                        "\"list\": [1, 2, 3]," +
+                        "\"map\": {\"k\": \"v\"}" +
+                        "}")));
+        CloudFoundryService service = environment.getService("false-syslog");
+
+        assertThat(service.getCredentials(), entries(containsInAnyOrder(
+                entry("boolean", true),
+                entry("int", 23),
+                entry("float", 3.14),
+                entry("list", Arrays.asList(1, 2, 3)),
+                entry("map", Collections.singletonMap("k", "v")))));
+    }
+
     @Test(expected = URISyntaxException.class)
     public void shouldNotRevealAMalformedUri() throws Exception {
         CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("postgres://", "postgres:||")));
