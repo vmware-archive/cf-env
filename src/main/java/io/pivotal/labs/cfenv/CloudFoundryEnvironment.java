@@ -7,15 +7,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public class CloudFoundryEnvironment {
 
     public static final String VCAP_SERVICES = "VCAP_SERVICES";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final Map<String, String> serviceUris = new HashMap<>();
+    private final Map<String, CloudFoundryService> services = new HashMap<>();
 
     public CloudFoundryEnvironment(Environment environment) throws CloudFoundryEnvironmentException {
         String vcapServices = environment.lookup(VCAP_SERVICES);
@@ -24,11 +26,8 @@ public class CloudFoundryEnvironment {
 
         rootNode.forEach(serviceTypeNode -> {
             serviceTypeNode.forEach(serviceInstanceNode -> {
-                String name = serviceInstanceNode.get("name").asText();
-                JsonNode uriNode = serviceInstanceNode.get("credentials").get("uri");
-                if (uriNode != null) {
-                    serviceUris.put(name, uriNode.asText());
-                }
+                CloudFoundryService service = createService(serviceInstanceNode);
+                services.put(service.getName(), service);
             });
         });
     }
@@ -41,12 +40,35 @@ public class CloudFoundryEnvironment {
         }
     }
 
+    private CloudFoundryService createService(JsonNode serviceInstanceNode) {
+        String name = serviceInstanceNode.get("name").asText();
+        String label = serviceInstanceNode.get("label").asText();
+        String plan = asOptional(serviceInstanceNode.get("plan"), JsonNode::asText);
+        Set<String> tags = asSet(serviceInstanceNode.get("tags"), JsonNode::asText);
+        String uri = asOptional(serviceInstanceNode.get("credentials").get("uri"), JsonNode::asText);
+        return new CloudFoundryService(name, label, plan, tags, uri);
+    }
+
+    private <E> E asOptional(JsonNode node, Function<JsonNode, E> conversion) {
+        return node != null ? conversion.apply(node) : null;
+    }
+
+    private <E> Set<E> asSet(JsonNode node, Function<JsonNode, E> conversion) {
+        Set<E> set = new HashSet<>();
+        node.forEach(child -> set.add(conversion.apply(child)));
+        return set;
+    }
+
     public Set<String> getServiceNames() {
-        return serviceUris.keySet();
+        return services.keySet();
+    }
+
+    public CloudFoundryService getService(String serviceName) {
+        return services.get(serviceName);
     }
 
     public URI getUri(String serviceName) throws URISyntaxException {
-        return new URI(serviceUris.get(serviceName));
+        return getService(serviceName).getUri();
     }
 
 }

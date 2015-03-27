@@ -11,8 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 public class CloudFoundryEnvironmentTests {
 
@@ -80,6 +79,30 @@ public class CloudFoundryEnvironmentTests {
         CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json", json -> json.replace("postgres://", "postgres:||")));
 
         environment.getUri("myapp-db");
+    }
+
+    @Test
+    public void shouldParseAllTheDetailsOfASystemService() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("system_service.json"));
+        CloudFoundryService service = environment.getService("myapp-db");
+
+        assertThat(service.getName(), equalTo("myapp-db"));
+        assertThat(service.getLabel(), equalTo("elephantsql"));
+        assertThat(service.getPlan(), equalTo("turtle"));
+        assertThat(service.getTags(), contains("Data Stores", "Cloud Databases", "Developer Tools", "Data Store", "postgresql", "relational", "New Product"));
+        assertThat(service.getUri(), equalTo(URI.create("postgres://dxktcwjm:xxxxxxxx@babar.elephantsql.com:5432/dxktcwjm")));
+    }
+
+    @Test
+    public void shouldParseAllTheDetailsOfAUserProvidedService() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(environmentWithVcapServices("user_provided_service.json"));
+        CloudFoundryService service = environment.getService("search-engine");
+
+        assertThat(service.getName(), equalTo("search-engine"));
+        assertThat(service.getLabel(), equalTo("user-provided"));
+        assertThat(service.getPlan(), nullValue());
+        assertThat(service.getTags(), empty());
+        assertThat(service.getUri(), equalTo(URI.create("https://duckduckgo.com/")));
     }
 
     private Environment environmentWithVcapServices(String jsonResourceName) throws IOException {
