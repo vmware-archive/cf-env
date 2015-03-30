@@ -1,6 +1,8 @@
 plugins {
     id 'java'
     id 'idea'
+    id 'maven'
+    id "com.jfrog.bintray" version "1.0"
 }
 
 assert gradle.gradleVersion == '2.3'
@@ -14,6 +16,8 @@ description = file('README.adoc').readLines()[0]
 ext.vendor = 'Pivotal Labs'
 ext.url = 'https://github.com/pivotal/cf-env'
 ext.license = 'BSD 2-Clause'
+
+apply from: 'release.gradle'
 
 repositories {
     jcenter()

@@ -1,0 +1,41 @@
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                name project.name
+                description project.description
+                url project.url
+
+                organization {
+                    name project.vendor
+                }
+
+                licenses {
+                    license {
+                        name project.license
+                        url "${project.url}/blob/master/LICENSE"
+                        distribution 'repo'
+                    }
+                }
+
+                scm {
+                    url project.url
+                    connection "scm:git:${project.url}.git"
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+
+    pkg {
+        repo = 'maven'
+        name = project.name
+    }
+    configurations = ['archives']
+
+    publish = true
+}

@@ -5,3 +5,13 @@ Build with Gradle:
 --------------------------------------
 ./gradlew build
 --------------------------------------
+
+Release with Gradle:
+
+--------------------------------------
+# you probably want to make these changes manually rather than like this
+sed -i -e "s/^version = .*/version = 'x.y.z'/" build.gradle
+echo -e "bintrayUser=pivotal-labs-london\nbintrayKey=..." >gradle.properties
+
+./gradlew bintrayUpload
+--------------------------------------
