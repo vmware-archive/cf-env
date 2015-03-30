@@ -10,10 +10,7 @@ Use as a dependency in your build:
 
 --------------------------------------
 repositories {
-    jcenter() // or mavenCentral, for transitive dependencies
-    maven {
-        url = 'http://dl.bintray.com/pivotal-labs-london/maven/'
-    }
+    jcenter()
 }
 
 dependencies {
@@ -21,7 +18,38 @@ dependencies {
 }
 --------------------------------------
 
-We hope to have the artifact available via JCenter soon, but until then, please use the repository on Bintray.
+Incorporate into your application:
+
+--------------------------------------
+@WebServlet("/ini")
+public class ServicesAsIniFileServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CloudFoundryEnvironment environment;
+        try {
+            environment = new CloudFoundryEnvironment(System::getenv);
+        } catch (CloudFoundryEnvironmentException e) {
+            throw new ServletException(e);
+        }
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/plain");
+
+        try (PrintWriter out = response.getWriter()) {
+            for (String serviceName : environment.getServiceNames()) {
+                CloudFoundryService service = environment.getService(serviceName);
+                out.println("[" + service.getName() + "]");
+                out.println("label = " + service.getLabel());
+                if (service.getPlan() != null) out.println("plan = " + service.getPlan());
+                out.println("tags = " + service.getTags().stream().collect(Collectors.joining(", ")));
+                Map<String, Object> credentials = service.getCredentials();
+                credentials.forEach((name, value) -> out.println("credentials." + name + " = " + value));
+                out.println();
+            }
+        }
+    }
+}
+--------------------------------------
 
 Build with Gradle:
 
