@@ -6,6 +6,23 @@ Download from Bintray:
 
 image::https://api.bintray.com/packages/pivotal-labs-london/maven/cf-env/images/download.svg[link="https://bintray.com/pivotal-labs-london/maven/cf-env/_latestVersion"]
 
+Use as a dependency in your build:
+
+--------------------------------------
+repositories {
+    jcenter() // or mavenCentral, for transitive dependencies
+    maven {
+        url = 'http://dl.bintray.com/pivotal-labs-london/maven/'
+    }
+}
+
+dependencies {
+    compile group: 'io.pivotal.labs', name: 'cf-env', version: '0.0.1'
+}
+--------------------------------------
+
+We hope to have the artifact available via JCenter soon, but until then, please use the repository on Bintray.
+
 Build with Gradle:
 
 --------------------------------------
