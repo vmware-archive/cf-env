@@ -1,5 +1,11 @@
 This is a small Java library for parsing the Cloud Foundry environment variables (VCAP_SERVICES and so on).
 
+// the first line of this file is used as a description in the POM, so keep it short and sweet!
+
+Download from Bintray:
+
+image::https://api.bintray.com/packages/pivotal-labs-london/maven/cf-env/images/download.svg[link="https://bintray.com/pivotal-labs-london/maven/cf-env/_latestVersion"]
+
 Build with Gradle:
 
 --------------------------------------
