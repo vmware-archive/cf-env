@@ -1,6 +1,6 @@
 plugins {
-  id 'java'
-  id 'idea'
+    id 'java'
+    id 'idea'
 }
 
 assert gradle.gradleVersion == '2.3'
@@ -21,6 +21,6 @@ dependencies {
 }
 
 idea.module {
-  outputDir = file('.idea/classes/main')
-  testOutputDir = file('.idea/classes/test')
+    outputDir = file('.idea/classes/main')
+    testOutputDir = file('.idea/classes/test')
 }
