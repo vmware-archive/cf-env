@@ -3,15 +3,25 @@ package io.pivotal.labs.cfenv;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CloudFoundryService {
+
+    private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN PRIVATE KEY-----\n(.*)\n-----END PRIVATE KEY-----\n?", Pattern.DOTALL);
 
     private final String name;
     private final String label;
@@ -93,6 +103,18 @@ public class CloudFoundryService {
 
     private ByteArrayInputStream toStream(String certificateString) {
         return new ByteArrayInputStream(certificateString.getBytes());
+    }
+
+    public Key getKey(String... path) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String keyString = (String) getCredential(path);
+
+        Matcher matcher = KEY_PATTERN.matcher(keyString);
+        if (!matcher.matches()) throw new IllegalArgumentException(keyString);
+        String keyBytesString = matcher.group(1);
+
+        byte[] keyBytes = Base64.getMimeDecoder().decode(keyBytesString);
+        KeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        return RSAKeyFactory.INSTANCE.generatePrivate(keySpec);
     }
 
 }

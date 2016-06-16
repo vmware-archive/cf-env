@@ -1,15 +1,21 @@
 package io.pivotal.labs.cfenv;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Key;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.NoSuchElementException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.startsWith;
 
 public class CloudFoundryServiceTests {
 
@@ -95,6 +101,25 @@ public class CloudFoundryServiceTests {
 
         Certificate certificate = service.getCertificate("ssl", "ca_cert");
         assertThat(((X509Certificate) certificate).getSubjectDN().getName(), equalTo("OU=IAmACertificateAuthority"));
+    }
+
+    @Test
+    public void shouldExtractAPKCS8PrivateKey() throws Exception {
+        CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
+                "-----BEGIN PRIVATE KEY-----\\n" +
+                "MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEA5qUWM0y4rQQWZdr1\\n" +
+                "D4bxiq1jZH1NSuYn21LApnDnt+Q4/CQ4/OIdh/hZljgFKq1oJg4ToeDubCtSLyR3\\n" +
+                "L89qDwIDAQABAkEAo6ekFwZrS6jI08EHfdr8bLAXBGi8fVbOFRukwvT+FkYqyc7G\\n" +
+                "0ja/6hQaO+kIA3ToVlKpyn/9mYTt/R/bXofMgQIhAP6nu78Qcn/Uy3qz/H5iifcf\\n" +
+                "ZRorAh4DqmjKZ5NGEDqhAiEA59zk2ExZUcpc4n65xVFHBFCT2ystB9NdzXicvNA9\\n" +
+                "lq8CIADL64Vser81njFTEM4gZsgUHA/Z5JbNciIDyBEo3fIhAiEA0ZITNn4r7YWf\\n" +
+                "Vwl8GCFSs0+xlNP9q6kci++MnA0M3fkCIHsxjW/AkmNozt8AsfIpBAGQ9teGLDPE\\n" +
+                "8WVZgWlRIjvA\\n" +
+                "-----END PRIVATE KEY-----" +
+                "\"}}");
+
+        Key key = service.getKey("ssl", "client_key");
+        assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("8571299855")));
     }
 
     private CloudFoundryService serviceWithCredentials(String credentials) throws CloudFoundryEnvironmentException {
