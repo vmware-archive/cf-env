@@ -2,6 +2,8 @@ package io.pivotal.labs.cfenv;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -46,6 +48,39 @@ public class CloudFoundryService {
         String uri = (String) credentials.get("uri");
         if (uri == null) throw new NoSuchElementException("no uri in service: " + name);
         return new URI(uri);
+    }
+
+    public Object getCredential(String... path) {
+        return getCredential(Arrays.asList(path));
+    }
+
+    private Object getCredential(List<String> path) {
+        Map<?, ?> map;
+        if (path.size() == 0) {
+            throw new IllegalArgumentException();
+        } else if (path.size() == 1) {
+            map = credentials;
+        } else {
+            Object parent = getCredential(head(path));
+            if (!(parent instanceof Map)) throw notFound(path);
+            map = (Map<?, ?>) parent;
+        }
+
+        String tail = tail(path);
+        if (!map.containsKey(tail)) throw notFound(path);
+        return map.get(tail);
+    }
+
+    private <E> List<E> head(List<E> list) {
+        return list.subList(0, list.size() - 1);
+    }
+
+    private <E> E tail(List<E> name) {
+        return name.get(name.size() - 1);
+    }
+
+    private NoSuchElementException notFound(List<String> path) {
+        return new NoSuchElementException(String.join(".", path));
     }
 
 }
