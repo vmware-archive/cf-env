@@ -66,3 +66,12 @@ echo -e "bintrayUser=pivotal-labs-london\nbintrayKey=..." >gradle.properties
 
 ./gradlew bintrayUpload
 --------------------------------------
+
+Create some SSL keys and certificates for testing the certificate handling:
+
+--------------------------------------
+openssl req -x509 -newkey 512 -subj /OU=IAmACertificateAuthority -nodes -keyout ca.key -out ca.crt
+openssl req -newkey 512 -subj /OU=IAmAService -nodes -keyout service.key -out service.csr
+openssl x509 -req -in service.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service.crt
+openssl pkcs8 -topk8 -in service.key -nocrypt -out service.key8
+--------------------------------------
