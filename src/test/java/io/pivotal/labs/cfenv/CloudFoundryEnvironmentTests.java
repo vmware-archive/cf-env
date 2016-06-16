@@ -96,7 +96,8 @@ public class CloudFoundryEnvironmentTests {
                         "\"int\": 23," +
                         "\"float\": 3.14," +
                         "\"list\": [1, 2, 3]," +
-                        "\"map\": {\"k\": \"v\"}" +
+                        "\"map\": {\"k\": \"v\"}," +
+                        "\"null\": null" +
                         "}")));
         CloudFoundryService service = environment.getService("false-syslog");
 
@@ -105,7 +106,8 @@ public class CloudFoundryEnvironmentTests {
                 entry("int", 23),
                 entry("float", 3.14),
                 entry("list", Arrays.asList(1, 2, 3)),
-                entry("map", Collections.singletonMap("k", "v")))));
+                entry("map", Collections.singletonMap("k", "v")),
+                entry("null", null))));
     }
 
     @Test(expected = NoSuchElementException.class)

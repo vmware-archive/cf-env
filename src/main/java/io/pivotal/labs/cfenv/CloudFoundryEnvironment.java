@@ -3,10 +3,7 @@ package io.pivotal.labs.cfenv;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,8 +42,7 @@ public class CloudFoundryEnvironment {
         Set<String> tags = asCollection(serviceInstanceNode.get("tags")).stream()
                 .map(String.class::cast)
                 .collect(Collectors.toSet());
-        Map<String, Object> credentials = asMap(serviceInstanceNode.get("credentials")).entrySet().stream()
-                .collect(Collectors.toMap(e -> (String) e.getKey(), e -> e.getValue()));
+        Map<String, Object> credentials = castKeysToString(asMap(serviceInstanceNode.get("credentials")));
         return new CloudFoundryService(name, label, plan, tags, credentials);
     }
 
@@ -56,6 +52,15 @@ public class CloudFoundryEnvironment {
 
     private Map<?, ?> asMap(Object o) {
         return (Map<?, ?>) o;
+    }
+
+    /**
+     * Can't use Collectors::toMap because it chokes on null values
+     */
+    private Map<String, Object> castKeysToString(Map<?, ?> map) {
+        Map<String, Object> credentials = new HashMap<>();
+        map.forEach((k, v) -> credentials.put((String) k, v));
+        return credentials;
     }
 
     public Set<String> getServiceNames() {
