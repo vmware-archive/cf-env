@@ -1,7 +1,10 @@
 package io.pivotal.labs.cfenv;
 
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +84,15 @@ public class CloudFoundryService {
 
     private NoSuchElementException notFound(List<String> path) {
         return new NoSuchElementException(String.join(".", path));
+    }
+
+    public Certificate getCertificate(String... path) throws CertificateException {
+        String certificateString = (String) getCredential(path);
+        return X509CertificateFactory.INSTANCE.generateCertificate(toStream(certificateString));
+    }
+
+    private ByteArrayInputStream toStream(String certificateString) {
+        return new ByteArrayInputStream(certificateString.getBytes());
     }
 
 }
