@@ -28,8 +28,8 @@ install {
 }
 
 bintray {
-    user = project.hasProperty("bintrayUser") ? bintrayUser : null
-    key = project.hasProperty("bintrayKey") ? bintrayKey : null
+    user = project.findProperty("bintrayUser")
+    key = project.findProperty("bintrayKey")
 
     pkg {
         repo = 'maven'

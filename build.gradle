@@ -5,7 +5,7 @@ plugins {
     id "com.jfrog.bintray" version "1.0"
 }
 
-assert gradle.gradleVersion == '2.3'
+assert gradle.gradleVersion == '2.14'
 
 sourceCompatibility = '1.8'
 
