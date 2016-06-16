@@ -7,14 +7,23 @@ import java.util.function.Function;
 
 public class TestEnvironment {
 
-    public static Environment withVcapServices(String jsonResourceName) throws IOException {
-        return withVcapServices(jsonResourceName, Function.identity());
+    public static Environment withVcapServicesFrom(String jsonResourceName) throws IOException {
+        return withVcapServicesFrom(jsonResourceName, Function.identity());
     }
 
-    public static Environment withVcapServices(String jsonResourceName, Function<String, String> tweak) throws IOException {
+    public static Environment withVcapServicesFrom(String jsonResourceName, Function<String, String> tweak) throws IOException {
         String json = ResourceUtils.loadResource(jsonResourceName);
         String tweakedJson = tweak.apply(json);
-        return with("VCAP_SERVICES", tweakedJson);
+        return withVcapServices(tweakedJson);
+    }
+
+    static Environment withVcapServicesContainingService(String name, String credentials) {
+        String json = String.format("{\"\": [{\"name\": \"%s\", \"credentials\": %s, \"label\": \"\", \"plan\": \"\", \"tags\": []}]}", name, credentials);
+        return withVcapServices(json);
+    }
+
+    public static Environment withVcapServices(String json) {
+        return with("VCAP_SERVICES", json);
     }
 
     public static Environment with(String name, String value) {
