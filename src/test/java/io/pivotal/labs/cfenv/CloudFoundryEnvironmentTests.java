@@ -2,8 +2,10 @@ package io.pivotal.labs.cfenv;
 
 import org.junit.Test;
 
-import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static io.pivotal.labs.cfenv.EntriesMatcher.entries;
 import static io.pivotal.labs.cfenv.EntriesMatcher.entry;
