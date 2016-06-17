@@ -2,14 +2,11 @@ package io.pivotal.labs.cfenv;
 
 import org.junit.Test;
 
-import javax.crypto.interfaces.DHPrivateKey;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Key;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.NoSuchElementException;
 
@@ -82,7 +79,7 @@ public class CloudFoundryServiceTests {
     }
 
     @Test
-    public void shouldExtractAnX509Certificate() throws Exception {
+    public void shouldExtractACertificate() throws Exception {
         CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"ca_cert\": \"" +
                 "-----BEGIN CERTIFICATE-----\\n" +
                 "MIIBxTCCAW+gAwIBAgIJAP6oSMcKL5/RMA0GCSqGSIb3DQEBBQUAMCMxITAfBgNV\\n" +
@@ -103,7 +100,7 @@ public class CloudFoundryServiceTests {
     }
 
     @Test
-    public void shouldExtractAPKCS8RSAPrivateKey() throws Exception {
+    public void shouldExtractAPrivateKey() throws Exception {
         CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
                 "-----BEGIN PRIVATE KEY-----\\n" +
                 "MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEA5qUWM0y4rQQWZdr1\\n" +
@@ -119,51 +116,6 @@ public class CloudFoundryServiceTests {
 
         Key key = service.getKey("ssl", "client_key");
         assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("8571299855")));
-    }
-
-    @Test
-    public void shouldExtractAPKCS8ECPrivateKey() throws Exception {
-        CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
-                "-----BEGIN PRIVATE KEY-----\\n" +
-                "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgcPpehQM6yoYp8/ZX\\n" +
-                "ouOlHTYO0WR+SneBWnBB07XgzKGhRANCAAT5PnuxmD5FygLB3x6sO/AEdmtCPKNA\\n" +
-                "BR867n9Hx2eVFxhxrb8g0ZAXNsYyrLKxNZV3YQVS816O5MN996XKA6bD\\n" +
-                "-----END PRIVATE KEY-----" +
-                "\"}}");
-
-        Key key = service.getKey("ssl", "client_key");
-        assertThat(((ECPrivateKey) key).getParams().getOrder(), hasToString(startsWith("1157920892")));
-    }
-
-    @Test
-    public void shouldExtractAPKCS8DSAPrivateKey() throws Exception {
-        CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
-                "-----BEGIN PRIVATE KEY-----\\n" +
-                "MIHHAgEAMIGpBgcqhkjOOAQBMIGdAkEA/8/aIwYwD4TUzee5AQvz4Bk24nAozkCJ\\n" +
-                "OOK/WEtLmlfdK3pWeZ7WttD65kJFgFZE1hDi0D0ipuXwFIJhqzoMcQIVAORLzKnx\\n" +
-                "1wfBs3Mngrh3XfyqOmUlAkEAvjDa+zB5mfAfIaYOgpuJzEGnLnj9VGLZEGVC/w3l\\n" +
-                "5ML3PblMCLMniHzIT3UQjQtTwOfiWa7RdAFrmjU7OQxJCQQWAhQETyaxnsWJO293\\n" +
-                "DZPkGsuQaq2xdw==\\n" +
-                "-----END PRIVATE KEY-----" +
-                "\"}}");
-
-        Key key = service.getKey("ssl", "client_key");
-        assertThat(((DSAPrivateKey) key).getX(), hasToString(startsWith("2460109266")));
-    }
-
-    @Test
-    public void shouldExtractAPKCS8DiffieHellmanAPrivateKey() throws Exception {
-        CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
-                "-----BEGIN PRIVATE KEY-----\\n" +
-                "MIGcAgEAMFMGCSqGSIb3DQEDATBGAkEAshUWtJRfsLnR5aFCGNa22yN2hxI5g95M\\n" +
-                "gd9ef3/JxE3m6bDawc5elyPGmKTdNSJbLFlXvlWOccZoMCNMDnrHYwIBAgRCAkBz\\n" +
-                "dbu4cSepe0ZleXxM0EwuVO9TJcYPM3s3aZL7NQl5xbLA0FIJrKI3ectYvxklhdS7\\n" +
-                "weJkKpkB0lUG2Rvmmt7q\\n" +
-                "-----END PRIVATE KEY-----" +
-                "\"}}");
-
-        Key key = service.getKey("ssl", "client_key");
-        assertThat(((DHPrivateKey) key).getX(), hasToString(startsWith("6047125407")));
     }
 
     private CloudFoundryService serviceWithCredentials(String credentials) throws CloudFoundryEnvironmentException {
