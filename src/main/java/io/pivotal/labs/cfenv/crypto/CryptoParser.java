@@ -7,15 +7,15 @@ import java.security.KeyFactory;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CryptoParser {
 
-    private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN PRIVATE KEY-----\n(.*)\n-----END PRIVATE KEY-----\n?", Pattern.DOTALL);
+    private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN (PUBLIC|PRIVATE) KEY-----\n(.*)\n-----END \\1 KEY-----\n?", Pattern.DOTALL);
 
     private static final byte[] RSA_SIGNATURE = bytes("06 09 2a 86 48 86 f7 0d 01 01 01");
     private static final byte[] EC_SIGNATURE = bytes("06 07 2a 86 48 ce 3d 02 01");
@@ -37,14 +37,22 @@ public class CryptoParser {
     public static Key parseKey(String keyString) throws InvalidKeySpecException {
         Matcher matcher = KEY_PATTERN.matcher(keyString);
         if (!matcher.matches()) throw new IllegalArgumentException("bad or unsupported PEM encoding: " + keyString);
-        String keyBytesString = matcher.group(1);
+        String keyBytesString = matcher.group(2);
 
         byte[] keyBytes = Base64.getMimeDecoder().decode(keyBytesString);
-        KeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
 
         KeyFactory keyFactory = chooseKeyFactory(keyBytes);
         if (keyFactory == null) throw new IllegalArgumentException("unsupported algorithm: " + keyString);
-        return keyFactory.generatePrivate(keySpec);
+
+        String keyType = matcher.group(1);
+        switch (keyType) {
+            case "PUBLIC":
+                return keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
+            case "PRIVATE":
+                return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
+            default:
+                throw new IllegalArgumentException("unsupported key type: " + keyString);
+        }
     }
 
     private static KeyFactory chooseKeyFactory(byte[] keyBytes) {

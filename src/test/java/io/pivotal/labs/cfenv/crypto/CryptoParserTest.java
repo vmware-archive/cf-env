@@ -3,12 +3,16 @@ package io.pivotal.labs.cfenv.crypto;
 import org.junit.Test;
 
 import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
 import java.security.Key;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -66,7 +70,7 @@ public class CryptoParserTest {
 
         Key key = CryptoParser.parseKey(keyString);
 
-        assertThat(((ECPrivateKey) key).getParams().getOrder(), hasToString(startsWith("1157920892")));
+        assertThat(((ECPrivateKey) key).getS(), hasToString(startsWith("5110140315")));
     }
 
     @Test
@@ -86,7 +90,7 @@ public class CryptoParserTest {
     }
 
     @Test
-    public void shouldParseAPKCS8DiffieHellmanAPrivateKey() throws Exception {
+    public void shouldParseAPKCS8DiffieHellmanPrivateKey() throws Exception {
         String keyString = "" +
                 "-----BEGIN PRIVATE KEY-----\n" +
                 "MIGcAgEAMFMGCSqGSIb3DQEDATBGAkEAshUWtJRfsLnR5aFCGNa22yN2hxI5g95M\n" +
@@ -98,6 +102,64 @@ public class CryptoParserTest {
         Key key = CryptoParser.parseKey(keyString);
 
         assertThat(((DHPrivateKey) key).getX(), hasToString(startsWith("6047125407")));
+    }
+
+    @Test
+    public void shouldParseAnX509RSAPublicKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN PUBLIC KEY-----\n" +
+                "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANRWMl170itmYoyX0nLWiP2+2VCGnJXK\n" +
+                "kB3EPHY+iIE+8irjd5YdHaYfVFEzB51TitpsZDG0EdBOIZBUsZ7C62kCAwEAAQ==\n" +
+                "-----END PUBLIC KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((RSAPublicKey) key).getPublicExponent(), hasToString(startsWith("65537")));
+    }
+
+    @Test
+    public void shouldParseAnX509ECPublicKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN PUBLIC KEY-----\n" +
+                "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhdurMOQ51O5509NInskLosONyAuQ\n" +
+                "O65tmKIZPVr+5YSrC8OKTywjCs34lXJfNQjCzNp1ueIPMTTtIun2BB9Isg==\n" +
+                "-----END PUBLIC KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((ECPublicKey) key).getW().getAffineX(), hasToString(startsWith("6054572988")));
+    }
+
+    @Test
+    public void shouldParseAnX509DSAPublicKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN PUBLIC KEY-----\n" +
+                "MIHyMIGpBgcqhkjOOAQBMIGdAkEA/8/aIwYwD4TUzee5AQvz4Bk24nAozkCJOOK/\n" +
+                "WEtLmlfdK3pWeZ7WttD65kJFgFZE1hDi0D0ipuXwFIJhqzoMcQIVAORLzKnx1wfB\n" +
+                "s3Mngrh3XfyqOmUlAkEAvjDa+zB5mfAfIaYOgpuJzEGnLnj9VGLZEGVC/w3l5ML3\n" +
+                "PblMCLMniHzIT3UQjQtTwOfiWa7RdAFrmjU7OQxJCQNEAAJBALhjbXYy4uG3yMV+\n" +
+                "h/Sd6SgxqgDr17n1dk2QH2r/4sMppgtMgCLNvb/3kuvK8novAEaHDEojWUkwtsSr\n" +
+                "sgXFLac=\n" +
+                "-----END PUBLIC KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((DSAPublicKey) key).getY(), hasToString(startsWith("9657203532")));
+    }
+
+    @Test
+    public void shouldParseAnX509DiffieHellmanPublicKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN PUBLIC KEY-----\n" +
+                "MIGbMFMGCSqGSIb3DQEDATBGAkEAshUWtJRfsLnR5aFCGNa22yN2hxI5g95Mgd9e\n" +
+                "f3/JxE3m6bDawc5elyPGmKTdNSJbLFlXvlWOccZoMCNMDnrHYwIBAgNEAAJBAIkh\n" +
+                "EFFcS4ISXXpl4ZpUX+pt59EWMMc0gR+icpUiMyl4+KCC04aTcSUS4KcD8quH9/9a\n" +
+                "TpZe/fw4hiJTgE71Aqs=\n" +
+                "-----END PUBLIC KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((DHPublicKey) key).getY(), hasToString(startsWith("7182036621")));
     }
 
 }

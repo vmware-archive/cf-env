@@ -77,18 +77,21 @@ openssl req -x509 -newkey 512 -subj /OU=IAmACertificateAuthority -nodes -keyout 
 openssl req -newkey 512 -subj /OU=IAmAService -nodes -keyout service_rsa.key -out service_rsa.csr
 openssl x509 -req -in service_rsa.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_rsa.crt
 openssl pkcs8 -topk8 -in service_rsa.key -nocrypt -out service_rsa.key8
+openssl pkey -in service_rsa.key -pubout -out service_rsa.pub
 
 # create, sign, and convert to PKCS#8 a service EC key pair
 openssl ecparam -name prime256v1 -genkey -noout -out service_ec.key
 openssl req -new -key service_ec.key -subj /OU=IAmAService -nodes -out service_ec.csr
 openssl x509 -req -in service_ec.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_ec.crt
 openssl pkcs8 -topk8 -in service_ec.key -nocrypt -out service_ec.key8
+openssl pkey -in service_ec.key -pubout -out service_ec.pub
 
 # create, sign, and convert to PKCS#8 a service DSA key pair
 openssl dsaparam -genkey 512 -noout -out service_dsa.key
 openssl req -new -key service_dsa.key -subj /OU=IAmAService -nodes -out service_dsa.csr
 openssl x509 -req -in service_dsa.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_dsa.crt
 openssl pkcs8 -topk8 -in service_dsa.key -nocrypt -out service_dsa.key8
+openssl pkey -in service_dsa.key -pubout -out service_dsa.pub
 
 # create, sign, and convert to PKCS#8 a service Diffie-Hellman key pair
 openssl dhparam 512 -out service_dh.params
@@ -97,6 +100,7 @@ openssl pkey -in service_dh.key -pubout -out service_dh.pub
 openssl req -newkey 512 -subj /OU=IAmAService -nodes -keyout service_dh_dummy.key -out service_dh_dummy.csr
 openssl x509 -req -in service_dh_dummy.csr -CAkey ca.key -CA ca.crt -CAcreateserial -force_pubkey service_dh.pub -out service_dh.crt
 openssl pkcs8 -topk8 -in service_dh.key -nocrypt -out service_dh.key8
+openssl pkey -in service_dh.key -pubout -out service_dh.pub
 
 # diagnostic functions
 dump_asn() { openssl asn1parse -i -in "$1"; }
