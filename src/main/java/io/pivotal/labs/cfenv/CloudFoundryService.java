@@ -1,30 +1,20 @@
 package io.pivotal.labs.cfenv;
 
-import javax.xml.bind.DatatypeConverter;
-import java.io.ByteArrayInputStream;
+import io.pivotal.labs.cfenv.crypto.CryptoParser;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CloudFoundryService {
-
-    private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN PRIVATE KEY-----\n(.*)\n-----END PRIVATE KEY-----\n?", Pattern.DOTALL);
-    private static final byte[] RSA_SIGNATURE = DatatypeConverter.parseHexBinary("06 09 2a 86 48 86 f7 0d 01 01 01".replace(" ", ""));
-    private static final byte[] EC_SIGNATURE = DatatypeConverter.parseHexBinary("06 07 2a 86 48 ce 3d 02 01".replace(" ", ""));
 
     private final String name;
     private final String label;
@@ -101,41 +91,12 @@ public class CloudFoundryService {
 
     public Certificate getCertificate(String... path) throws CertificateException {
         String certificateString = (String) getCredential(path);
-        return X509CertificateFactory.INSTANCE.generateCertificate(toStream(certificateString));
+        return CryptoParser.parseCertificate(certificateString);
     }
 
-    private ByteArrayInputStream toStream(String certificateString) {
-        return new ByteArrayInputStream(certificateString.getBytes());
-    }
-
-    public Key getKey(String... path) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public Key getKey(String... path) throws InvalidKeySpecException {
         String keyString = (String) getCredential(path);
-
-        Matcher matcher = KEY_PATTERN.matcher(keyString);
-        if (!matcher.matches()) throw new IllegalArgumentException("bad or unsupported PEM encoding: " + keyString);
-        String keyBytesString = matcher.group(1);
-
-        byte[] keyBytes = Base64.getMimeDecoder().decode(keyBytesString);
-        KeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-
-        if (contains(keyBytes, RSA_SIGNATURE)) {
-            return RSAKeyFactory.INSTANCE.generatePrivate(keySpec);
-        } else if (contains(keyBytes, EC_SIGNATURE)) {
-            return ECKeyFactory.INSTANCE.generatePrivate(keySpec);
-        } else {
-            throw new IllegalArgumentException("unsupported algorithm: " + keyString);
-        }
-    }
-
-    private boolean contains(byte[] haystack, byte[] needle) {
-        bytes:
-        for (int i = 0; i < haystack.length; i++) {
-            for (int j = 0; j < needle.length; j++) {
-                if (haystack[i + j] != needle[j]) continue bytes;
-            }
-            return true;
-        }
-        return false;
+        return CryptoParser.parseKey(keyString);
     }
 
 }
