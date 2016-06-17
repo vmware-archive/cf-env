@@ -17,6 +17,7 @@ public class CryptoParser {
     private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN PRIVATE KEY-----\n(.*)\n-----END PRIVATE KEY-----\n?", Pattern.DOTALL);
     private static final byte[] RSA_SIGNATURE = bytes("06 09 2a 86 48 86 f7 0d 01 01 01");
     private static final byte[] EC_SIGNATURE = bytes("06 07 2a 86 48 ce 3d 02 01");
+    private static final byte[] DSA_SIGNATURE = bytes("06 07 2a 86 48 ce 38 04 01");
 
     private static byte[] bytes(String hex) {
         return DatatypeConverter.parseHexBinary(hex.replace(" ", ""));
@@ -42,6 +43,8 @@ public class CryptoParser {
             return RSAKeyFactory.INSTANCE.generatePrivate(keySpec);
         } else if (contains(keyBytes, EC_SIGNATURE)) {
             return ECKeyFactory.INSTANCE.generatePrivate(keySpec);
+        } else if (contains(keyBytes, DSA_SIGNATURE)) {
+            return DSAKeyFactory.INSTANCE.generatePrivate(keySpec);
         } else {
             throw new IllegalArgumentException("unsupported algorithm: " + keyString);
         }

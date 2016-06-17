@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.security.Key;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.NoSuchElementException;
@@ -126,11 +127,27 @@ public class CloudFoundryServiceTests {
                 "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgcPpehQM6yoYp8/ZX\\n" +
                 "ouOlHTYO0WR+SneBWnBB07XgzKGhRANCAAT5PnuxmD5FygLB3x6sO/AEdmtCPKNA\\n" +
                 "BR867n9Hx2eVFxhxrb8g0ZAXNsYyrLKxNZV3YQVS816O5MN996XKA6bD\\n" +
-                "-----END PRIVATE KEY-----\\n" +
+                "-----END PRIVATE KEY-----" +
                 "\"}}");
 
         Key key = service.getKey("ssl", "client_key");
         assertThat(((ECPrivateKey) key).getParams().getOrder(), hasToString(startsWith("1157920892")));
+    }
+
+    @Test
+    public void shouldExtractAPKCS8DSAPrivateKey() throws Exception {
+        CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
+                "-----BEGIN PRIVATE KEY-----\\n" +
+                "MIHHAgEAMIGpBgcqhkjOOAQBMIGdAkEA/8/aIwYwD4TUzee5AQvz4Bk24nAozkCJ\\n" +
+                "OOK/WEtLmlfdK3pWeZ7WttD65kJFgFZE1hDi0D0ipuXwFIJhqzoMcQIVAORLzKnx\\n" +
+                "1wfBs3Mngrh3XfyqOmUlAkEAvjDa+zB5mfAfIaYOgpuJzEGnLnj9VGLZEGVC/w3l\\n" +
+                "5ML3PblMCLMniHzIT3UQjQtTwOfiWa7RdAFrmjU7OQxJCQQWAhQETyaxnsWJO293\\n" +
+                "DZPkGsuQaq2xdw==\\n" +
+                "-----END PRIVATE KEY-----" +
+                "\"}}");
+
+        Key key = service.getKey("ssl", "client_key");
+        assertThat(((DSAPrivateKey) key).getX(), hasToString(startsWith("2460109266")));
     }
 
     private CloudFoundryService serviceWithCredentials(String credentials) throws CloudFoundryEnvironmentException {

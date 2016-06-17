@@ -84,6 +84,12 @@ openssl req -new -key service_ec.key -subj /OU=IAmAService -nodes -out service_e
 openssl x509 -req -in service_ec.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_ec.crt
 openssl pkcs8 -topk8 -in service_ec.key -nocrypt -out service_ec.key8
 
+# create, sign, and convert to PKCS#8 a service DSA key pair
+openssl dsaparam -genkey 512 -noout -out service_dsa.key
+openssl req -new -key service_dsa.key -subj /OU=IAmAService -nodes -out service_dsa.csr
+openssl x509 -req -in service_dsa.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_dsa.crt
+openssl pkcs8 -topk8 -in service_dsa.key -nocrypt -out service_dsa.key8
+
 # diagnostic functions
 dump_asn() { openssl asn1parse -i -in "$1"; }
 dump_hex() { egrep -v '^--' <"$1" | base64 -D | hexdump | sed -E 's/^.{7}.?//' | tr '\n' ' ' | tr -s ' '; echo; }
