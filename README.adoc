@@ -70,8 +70,24 @@ echo -e "bintrayUser=pivotal-labs-london\nbintrayKey=..." >gradle.properties
 Create some SSL keys and certificates for testing the certificate handling:
 
 --------------------------------------
+# create a CA RSA key pair
 openssl req -x509 -newkey 512 -subj /OU=IAmACertificateAuthority -nodes -keyout ca.key -out ca.crt
-openssl req -newkey 512 -subj /OU=IAmAService -nodes -keyout service.key -out service.csr
-openssl x509 -req -in service.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service.crt
-openssl pkcs8 -topk8 -in service.key -nocrypt -out service.key8
+
+# create, sign, and convert to PKCS#8 a service RSA key pair
+openssl req -newkey 512 -subj /OU=IAmAService -nodes -keyout service_rsa.key -out service_rsa.csr
+openssl x509 -req -in service_rsa.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_rsa.crt
+openssl pkcs8 -topk8 -in service_rsa.key -nocrypt -out service_rsa.key8
+
+# create, sign, and convert to PKCS#8 a service EC key pair
+openssl ecparam -name prime256v1 -genkey -noout -out service_ec.key
+openssl req -new -key service_ec.key -subj /OU=IAmAService -nodes -out service_ec.csr
+openssl x509 -req -in service_ec.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_ec.crt
+openssl pkcs8 -topk8 -in service_ec.key -nocrypt -out service_ec.key8
+
+# diagnostic functions
+dump_asn() { openssl asn1parse -i -in "$1"; }
+dump_hex() { egrep -v '^--' <"$1" | base64 -D | hexdump | sed -E 's/^.{7}.?//' | tr '\n' ' ' | tr -s ' '; echo; }
+dump_cert() { openssl x509 -in "$1" -text -noout; }
+dump_rsa_key() { openssl rsa -in "$1" -text -noout; }
+dump_ec_key() { openssl ec -in "$1" -text -noout; }
 --------------------------------------

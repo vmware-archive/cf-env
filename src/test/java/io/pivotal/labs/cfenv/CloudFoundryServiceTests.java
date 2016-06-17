@@ -101,7 +101,7 @@ public class CloudFoundryServiceTests {
     }
 
     @Test
-    public void shouldExtractAPKCS8PrivateKey() throws Exception {
+    public void shouldExtractAPKCS8RSAPrivateKey() throws Exception {
         CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
                 "-----BEGIN PRIVATE KEY-----\\n" +
                 "MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEA5qUWM0y4rQQWZdr1\\n" +
@@ -117,6 +117,20 @@ public class CloudFoundryServiceTests {
 
         Key key = service.getKey("ssl", "client_key");
         assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("8571299855")));
+    }
+
+    @Test
+    public void shouldExtractAPKCS8ECPrivateKey() throws Exception {
+        CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
+                "-----BEGIN PRIVATE KEY-----\\n" +
+                "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgcPpehQM6yoYp8/ZX\\n" +
+                "ouOlHTYO0WR+SneBWnBB07XgzKGhRANCAAT5PnuxmD5FygLB3x6sO/AEdmtCPKNA\\n" +
+                "BR867n9Hx2eVFxhxrb8g0ZAXNsYyrLKxNZV3YQVS816O5MN996XKA6bD\\n" +
+                "-----END PRIVATE KEY-----\\n" +
+                "\"}}");
+
+        Key key = service.getKey("ssl", "client_key");
+        assertThat(((ECPrivateKey) key).getParams().getOrder(), hasToString(startsWith("1157920892")));
     }
 
     private CloudFoundryService serviceWithCredentials(String credentials) throws CloudFoundryEnvironmentException {

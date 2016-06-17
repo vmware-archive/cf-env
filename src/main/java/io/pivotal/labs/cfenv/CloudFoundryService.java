@@ -1,5 +1,6 @@
 package io.pivotal.labs.cfenv;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,6 +23,8 @@ import java.util.regex.Pattern;
 public class CloudFoundryService {
 
     private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN PRIVATE KEY-----\n(.*)\n-----END PRIVATE KEY-----\n?", Pattern.DOTALL);
+    private static final byte[] RSA_SIGNATURE = DatatypeConverter.parseHexBinary("06 09 2a 86 48 86 f7 0d 01 01 01".replace(" ", ""));
+    private static final byte[] EC_SIGNATURE = DatatypeConverter.parseHexBinary("06 07 2a 86 48 ce 3d 02 01".replace(" ", ""));
 
     private final String name;
     private final String label;
@@ -109,12 +112,30 @@ public class CloudFoundryService {
         String keyString = (String) getCredential(path);
 
         Matcher matcher = KEY_PATTERN.matcher(keyString);
-        if (!matcher.matches()) throw new IllegalArgumentException(keyString);
+        if (!matcher.matches()) throw new IllegalArgumentException("bad or unsupported PEM encoding: " + keyString);
         String keyBytesString = matcher.group(1);
 
         byte[] keyBytes = Base64.getMimeDecoder().decode(keyBytesString);
         KeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-        return RSAKeyFactory.INSTANCE.generatePrivate(keySpec);
+
+        if (contains(keyBytes, RSA_SIGNATURE)) {
+            return RSAKeyFactory.INSTANCE.generatePrivate(keySpec);
+        } else if (contains(keyBytes, EC_SIGNATURE)) {
+            return ECKeyFactory.INSTANCE.generatePrivate(keySpec);
+        } else {
+            throw new IllegalArgumentException("unsupported algorithm: " + keyString);
+        }
+    }
+
+    private boolean contains(byte[] haystack, byte[] needle) {
+        bytes:
+        for (int i = 0; i < haystack.length; i++) {
+            for (int j = 0; j < needle.length; j++) {
+                if (haystack[i + j] != needle[j]) continue bytes;
+            }
+            return true;
+        }
+        return false;
     }
 
 }
