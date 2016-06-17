@@ -162,4 +162,22 @@ public class CryptoParserTest {
         assertThat(((DHPublicKey) key).getY(), hasToString(startsWith("7182036621")));
     }
 
+    @Test
+    public void shouldParseAPKCS1RSAPrivateKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN RSA PRIVATE KEY-----\n" +
+                "MIIBOgIBAAJBANRWMl170itmYoyX0nLWiP2+2VCGnJXKkB3EPHY+iIE+8irjd5Yd\n" +
+                "HaYfVFEzB51TitpsZDG0EdBOIZBUsZ7C62kCAwEAAQJBANJ0TJ8TZo/Vfr/Siqd/\n" +
+                "s2+shT+m6/QbPRQDt9mKyUkvB3RpSAdel29kpURHgZdjHuxyKVgb2FEdFIBF014o\n" +
+                "PfECIQD2yWRZCN7DZWAuDos1Ub76XcBlB7ud7fsJM/gETip/YwIhANxDjo0S/sNg\n" +
+                "8ABHrm9opbUD3TTdXbTclK9ZFu+q8YHDAiANEgeFi6m4sZLRfaWz0juKKRL6htlR\n" +
+                "+Pu1thHpsHYhvwIgTZwwOl0bD1S0vCSFvhOtb56w7tOhFP00FqTZhBFDj2kCIFzH\n" +
+                "7v/ViZaAZkY0jD9J7XTX+57Tv2Gt22vG0Uhn9G/r\n" +
+                "-----END RSA PRIVATE KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("1102238575")));
+    }
+
 }
