@@ -90,6 +90,14 @@ openssl req -new -key service_dsa.key -subj /OU=IAmAService -nodes -out service_
 openssl x509 -req -in service_dsa.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_dsa.crt
 openssl pkcs8 -topk8 -in service_dsa.key -nocrypt -out service_dsa.key8
 
+# create, sign, and convert to PKCS#8 a service Diffie-Hellman key pair
+openssl dhparam 512 -out service_dh.params
+openssl genpkey -paramfile service_dh.params -out service_dh.key
+openssl pkey -in service_dh.key -pubout -out service_dh.pub
+openssl req -newkey 512 -subj /OU=IAmAService -nodes -keyout service_dh_dummy.key -out service_dh_dummy.csr
+openssl x509 -req -in service_dh_dummy.csr -CAkey ca.key -CA ca.crt -CAcreateserial -force_pubkey service_dh.pub -out service_dh.crt
+openssl pkcs8 -topk8 -in service_dh.key -nocrypt -out service_dh.key8
+
 # diagnostic functions
 dump_asn() { openssl asn1parse -i -in "$1"; }
 dump_hex() { egrep -v '^--' <"$1" | base64 -D | hexdump | sed -E 's/^.{7}.?//' | tr '\n' ' ' | tr -s ' '; echo; }

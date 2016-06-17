@@ -2,6 +2,7 @@ package io.pivotal.labs.cfenv;
 
 import org.junit.Test;
 
+import javax.crypto.interfaces.DHPrivateKey;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Key;
@@ -148,6 +149,21 @@ public class CloudFoundryServiceTests {
 
         Key key = service.getKey("ssl", "client_key");
         assertThat(((DSAPrivateKey) key).getX(), hasToString(startsWith("2460109266")));
+    }
+
+    @Test
+    public void shouldExtractAPKCS8DiffieHellmanAPrivateKey() throws Exception {
+        CloudFoundryService service = serviceWithCredentials("{\"ssl\": {\"client_key\": \"" +
+                "-----BEGIN PRIVATE KEY-----\\n" +
+                "MIGcAgEAMFMGCSqGSIb3DQEDATBGAkEAshUWtJRfsLnR5aFCGNa22yN2hxI5g95M\\n" +
+                "gd9ef3/JxE3m6bDawc5elyPGmKTdNSJbLFlXvlWOccZoMCNMDnrHYwIBAgRCAkBz\\n" +
+                "dbu4cSepe0ZleXxM0EwuVO9TJcYPM3s3aZL7NQl5xbLA0FIJrKI3ectYvxklhdS7\\n" +
+                "weJkKpkB0lUG2Rvmmt7q\\n" +
+                "-----END PRIVATE KEY-----" +
+                "\"}}");
+
+        Key key = service.getKey("ssl", "client_key");
+        assertThat(((DHPrivateKey) key).getX(), hasToString(startsWith("6047125407")));
     }
 
     private CloudFoundryService serviceWithCredentials(String credentials) throws CloudFoundryEnvironmentException {
