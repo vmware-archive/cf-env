@@ -108,8 +108,8 @@ public class CryptoParserTest {
     public void shouldParseAnX509RSAPublicKey() throws Exception {
         String keyString = "" +
                 "-----BEGIN PUBLIC KEY-----\n" +
-                "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANRWMl170itmYoyX0nLWiP2+2VCGnJXK\n" +
-                "kB3EPHY+iIE+8irjd5YdHaYfVFEzB51TitpsZDG0EdBOIZBUsZ7C62kCAwEAAQ==\n" +
+                "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAOalFjNMuK0EFmXa9Q+G8YqtY2R9TUrm\n" +
+                "J9tSwKZw57fkOPwkOPziHYf4WZY4BSqtaCYOE6Hg7mwrUi8kdy/Pag8CAwEAAQ==\n" +
                 "-----END PUBLIC KEY-----";
 
         Key key = CryptoParser.parseKey(keyString);
@@ -121,13 +121,13 @@ public class CryptoParserTest {
     public void shouldParseAnX509ECPublicKey() throws Exception {
         String keyString = "" +
                 "-----BEGIN PUBLIC KEY-----\n" +
-                "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhdurMOQ51O5509NInskLosONyAuQ\n" +
-                "O65tmKIZPVr+5YSrC8OKTywjCs34lXJfNQjCzNp1ueIPMTTtIun2BB9Isg==\n" +
+                "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+T57sZg+RcoCwd8erDvwBHZrQjyj\n" +
+                "QAUfOu5/R8dnlRcYca2/INGQFzbGMqyysTWVd2EFUvNejuTDffelygOmww==\n" +
                 "-----END PUBLIC KEY-----";
 
         Key key = CryptoParser.parseKey(keyString);
 
-        assertThat(((ECPublicKey) key).getW().getAffineX(), hasToString(startsWith("6054572988")));
+        assertThat(((ECPublicKey) key).getW().getAffineX(), hasToString(startsWith("1127362975")));
     }
 
     @Test
@@ -166,18 +166,18 @@ public class CryptoParserTest {
     public void shouldParseAPKCS1RSAPrivateKey() throws Exception {
         String keyString = "" +
                 "-----BEGIN RSA PRIVATE KEY-----\n" +
-                "MIIBOgIBAAJBANRWMl170itmYoyX0nLWiP2+2VCGnJXKkB3EPHY+iIE+8irjd5Yd\n" +
-                "HaYfVFEzB51TitpsZDG0EdBOIZBUsZ7C62kCAwEAAQJBANJ0TJ8TZo/Vfr/Siqd/\n" +
-                "s2+shT+m6/QbPRQDt9mKyUkvB3RpSAdel29kpURHgZdjHuxyKVgb2FEdFIBF014o\n" +
-                "PfECIQD2yWRZCN7DZWAuDos1Ub76XcBlB7ud7fsJM/gETip/YwIhANxDjo0S/sNg\n" +
-                "8ABHrm9opbUD3TTdXbTclK9ZFu+q8YHDAiANEgeFi6m4sZLRfaWz0juKKRL6htlR\n" +
-                "+Pu1thHpsHYhvwIgTZwwOl0bD1S0vCSFvhOtb56w7tOhFP00FqTZhBFDj2kCIFzH\n" +
-                "7v/ViZaAZkY0jD9J7XTX+57Tv2Gt22vG0Uhn9G/r\n" +
+                "MIIBOwIBAAJBAOalFjNMuK0EFmXa9Q+G8YqtY2R9TUrmJ9tSwKZw57fkOPwkOPzi\n" +
+                "HYf4WZY4BSqtaCYOE6Hg7mwrUi8kdy/Pag8CAwEAAQJBAKOnpBcGa0uoyNPBB33a\n" +
+                "/GywFwRovH1WzhUbpML0/hZGKsnOxtI2v+oUGjvpCAN06FZSqcp//ZmE7f0f216H\n" +
+                "zIECIQD+p7u/EHJ/1Mt6s/x+Yon3H2UaKwIeA6poymeTRhA6oQIhAOfc5NhMWVHK\n" +
+                "XOJ+ucVRRwRQk9srLQfTXc14nLzQPZavAiAAy+uFbHq/NZ4xUxDOIGbIFBwP2eSW\n" +
+                "zXIiA8gRKN3yIQIhANGSEzZ+K+2Fn1cJfBghUrNPsZTT/aupHIvvjJwNDN35AiB7\n" +
+                "MY1vwJJjaM7fALHyKQQBkPbXhiwzxPFlWYFpUSI7wA==\n" +
                 "-----END RSA PRIVATE KEY-----";
 
         Key key = CryptoParser.parseKey(keyString);
 
-        assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("1102238575")));
+        assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("8571299855")));
     }
 
 }
