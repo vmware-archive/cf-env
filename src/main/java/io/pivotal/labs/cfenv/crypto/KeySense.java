@@ -10,7 +10,7 @@ import java.security.spec.X509EncodedKeySpec;
 public enum KeySense {
     PUBLIC {
         @Override
-        public KeySpec nativeSpec(byte[] keyBytes) {
+        public KeySpec parseNativeSpec(byte[] keyBytes) {
             return new X509EncodedKeySpec(keyBytes);
         }
 
@@ -21,7 +21,7 @@ public enum KeySense {
     },
     PRIVATE {
         @Override
-        public KeySpec nativeSpec(byte[] keyBytes) {
+        public KeySpec parseNativeSpec(byte[] keyBytes) {
             return new PKCS8EncodedKeySpec(keyBytes);
         }
 
@@ -31,7 +31,7 @@ public enum KeySense {
         }
     };
 
-    public abstract KeySpec nativeSpec(byte[] keyBytes);
+    public abstract KeySpec parseNativeSpec(byte[] keyBytes);
 
     public abstract Key generate(KeyFactory keyFactory, KeySpec spec) throws InvalidKeySpecException;
 

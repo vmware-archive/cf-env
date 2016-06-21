@@ -33,29 +33,25 @@ public class CryptoParser {
 
         byte[] bytes = decodeBase64(bytesString);
 
+        KeyFormat format = algorithmString == null ? KeyFormat.NATIVE : KeyFormat.LEGACY;
+
         KeyAlgorithm algorithm;
-        if (algorithmString == null) {
-            algorithm = KeyAlgorithm.determineAlgorithm(bytes);
-            if (algorithm == null) throw new InvalidKeySpecException("unsupported algorithm: " + keyString);
-        } else {
-            algorithm = KeyAlgorithm.valueOf(algorithmString);
+        try {
+            algorithm = format.determineAlgorithm(algorithmString, bytes);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidKeySpecException("unsupported algorithm: " + keyString, e);
         }
 
         KeySense sense = KeySense.valueOf(senseString);
 
-        KeyFactory keyFactory;
         KeySpec spec;
-        if (algorithmString == null) {
-            spec = sense.nativeSpec(bytes);
-        } else {
-            try {
-                spec = algorithm.parsePkcs1PrivateKeySpec(bytes);
-            } catch (IOException e) {
-                throw new InvalidKeySpecException("could not determine " + algorithmString + " key spec: " + keyString, e);
-            }
+        try {
+            spec = format.parse(algorithm, sense, bytes);
+        } catch (IOException e) {
+            throw new InvalidKeySpecException("could not determine " + algorithmString + " key spec: " + keyString, e);
         }
 
-        keyFactory = algorithm.getFactory();
+        KeyFactory keyFactory = algorithm.getFactory();
 
         return sense.generate(keyFactory, spec);
     }

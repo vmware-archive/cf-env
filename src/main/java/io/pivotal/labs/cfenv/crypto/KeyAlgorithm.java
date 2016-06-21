@@ -17,7 +17,7 @@ public enum KeyAlgorithm {
         }
 
         @Override
-        public KeySpec parsePkcs1PrivateKeySpec(byte[] keyBytes) throws IOException {
+        public KeySpec parseLegacyPrivateKeySpec(byte[] keyBytes) throws IOException {
             return new PKCS8EncodedKeySpec(PKCS8.wrap(Arrays.asList(RSA.oid), keyBytes));
         }
     },
@@ -28,7 +28,7 @@ public enum KeyAlgorithm {
         }
 
         @Override
-        public KeySpec parsePkcs1PrivateKeySpec(byte[] keyBytes) throws IOException {
+        public KeySpec parseLegacyPrivateKeySpec(byte[] keyBytes) throws IOException {
             byte[] ecDomainParameters = DERInputStream.fromBytes(keyBytes, (in) -> {
                 // as per RFC 5915
                 in.readSequenceStart();
@@ -47,7 +47,7 @@ public enum KeyAlgorithm {
         }
 
         @Override
-        public KeySpec parsePkcs1PrivateKeySpec(byte[] keyBytes) throws IOException {
+        public KeySpec parseLegacyPrivateKeySpec(byte[] keyBytes) throws IOException {
             return DERInputStream.fromBytes(keyBytes, in -> {
                 in.readSequenceStart();
                 in.readInteger();
@@ -67,7 +67,7 @@ public enum KeyAlgorithm {
         }
 
         @Override
-        public KeySpec parsePkcs1PrivateKeySpec(byte[] keyBytes) throws IOException {
+        public KeySpec parseLegacyPrivateKeySpec(byte[] keyBytes) throws IOException {
             throw new IOException("there are no PKCS#1 DH keys");
         }
     };
@@ -77,7 +77,7 @@ public enum KeyAlgorithm {
         else if (contains(keyBytes, EC.signature)) return EC;
         else if (contains(keyBytes, DSA.signature)) return DSA;
         else if (contains(keyBytes, DH.signature)) return DH;
-        else return null;
+        else throw new IllegalArgumentException("no algorithm signature recognised");
     }
 
     private static boolean contains(byte[] haystack, byte[] needle) {
@@ -101,6 +101,6 @@ public enum KeyAlgorithm {
 
     public abstract KeyFactory getFactory();
 
-    public abstract KeySpec parsePkcs1PrivateKeySpec(byte[] keyBytes) throws IOException;
+    public abstract KeySpec parseLegacyPrivateKeySpec(byte[] keyBytes) throws IOException;
 
 }
