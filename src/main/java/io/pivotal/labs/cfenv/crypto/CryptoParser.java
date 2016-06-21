@@ -3,7 +3,6 @@ package io.pivotal.labs.cfenv.crypto;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Key;
-import java.security.KeyFactory;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
@@ -33,6 +32,8 @@ public class CryptoParser {
 
         byte[] bytes = decodeBase64(bytesString);
 
+        KeySense sense = KeySense.valueOf(senseString);
+
         KeyFormat format = algorithmString == null ? KeyFormat.NATIVE : KeyFormat.LEGACY;
 
         KeyAlgorithm algorithm;
@@ -42,18 +43,14 @@ public class CryptoParser {
             throw new InvalidKeySpecException("unsupported algorithm: " + keyString, e);
         }
 
-        KeySense sense = KeySense.valueOf(senseString);
-
         KeySpec spec;
         try {
-            spec = format.parse(algorithm, sense, bytes);
+            spec = sense.parseKey(format, algorithm, bytes);
         } catch (IOException e) {
             throw new InvalidKeySpecException("could not determine " + algorithmString + " key spec: " + keyString, e);
         }
 
-        KeyFactory keyFactory = algorithm.getFactory();
-
-        return sense.generate(keyFactory, spec);
+        return sense.generate(algorithm, spec);
     }
 
     private static byte[] decodeBase64(String keyBytesString) {
