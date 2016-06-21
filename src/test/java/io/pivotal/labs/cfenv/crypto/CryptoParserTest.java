@@ -180,4 +180,18 @@ public class CryptoParserTest {
         assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("8571299855")));
     }
 
+    @Test
+    public void shouldParseAPKCS1ECPrivateKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN EC PRIVATE KEY-----\n" +
+                "MHcCAQEEIHD6XoUDOsqGKfP2V6LjpR02DtFkfkp3gVpwQdO14MyhoAoGCCqGSM49\n" +
+                "AwEHoUQDQgAE+T57sZg+RcoCwd8erDvwBHZrQjyjQAUfOu5/R8dnlRcYca2/INGQ\n" +
+                "FzbGMqyysTWVd2EFUvNejuTDffelygOmww==\n" +
+                "-----END EC PRIVATE KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((ECPrivateKey) key).getS(), hasToString(startsWith("5110140315")));
+    }
+
 }

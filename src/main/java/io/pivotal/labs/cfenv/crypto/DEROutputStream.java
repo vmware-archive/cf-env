@@ -23,12 +23,6 @@ public class DEROutputStream extends FilterOutputStream {
         return buffer.toByteArray();
     }
 
-    private static final int TAG_INTEGER = 0x02;
-    private static final int TAG_OCTET_STRING = 0x04;
-    private static final int TAG_NULL = 0x05;
-    private static final int TAG_OBJECT_ID = 0x06;
-    private static final int TAG_SEQUENCE = 0x30;
-
     public DEROutputStream(OutputStream out) {
         super(out);
     }
@@ -64,7 +58,7 @@ public class DEROutputStream extends FilterOutputStream {
     }
 
     public void writeInteger(int integer) throws IOException {
-        writeTagAndLength(TAG_INTEGER, 1);
+        writeTagAndLength(DERTags.TAG_INTEGER, 1);
         if (integer < 1 << 8) {
             write(integer);
         } else if (integer < 1 << 16) {
@@ -85,7 +79,7 @@ public class DEROutputStream extends FilterOutputStream {
     }
 
     public void writeOctetString(byte[] octetString) throws IOException {
-        writeTagAndLength(TAG_OCTET_STRING, octetString.length);
+        writeTagAndLength(DERTags.TAG_OCTET_STRING, octetString.length);
         write(octetString);
     }
 
@@ -94,7 +88,7 @@ public class DEROutputStream extends FilterOutputStream {
     }
 
     public void writeNull() throws IOException {
-        writeTagAndLength(TAG_NULL, 0);
+        writeTagAndLength(DERTags.TAG_NULL, 0);
     }
 
     public static int measureObjectID(byte[] oid) {
@@ -106,7 +100,7 @@ public class DEROutputStream extends FilterOutputStream {
         if (oid == null) {
             writeNull();
         } else {
-            writeTagAndLength(TAG_OBJECT_ID, oid.length);
+            writeTagAndLength(DERTags.TAG_OBJECT_ID, oid.length);
             write(oid);
         }
     }
@@ -116,7 +110,7 @@ public class DEROutputStream extends FilterOutputStream {
     }
 
     public void writeSequenceStart(int... lengths) throws IOException {
-        writeTagAndLength(TAG_SEQUENCE, IntStream.of(lengths).sum());
+        writeTagAndLength(DERTags.TAG_SEQUENCE, IntStream.of(lengths).sum());
     }
 
     private void writeTagAndLength(int tag, int length) throws IOException {

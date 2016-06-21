@@ -2,6 +2,7 @@ package io.pivotal.labs.cfenv.crypto;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.cert.Certificate;
@@ -11,12 +12,13 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CryptoParser {
 
-    private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN ((?:(RSA) )?(PUBLIC|PRIVATE)) KEY-----\n(.*)\n-----END \\1 KEY-----\n?", Pattern.DOTALL);
+    private static final Pattern KEY_PATTERN = Pattern.compile("-----BEGIN ((?:(RSA|EC) )?(PUBLIC|PRIVATE)) KEY-----\n(.*)\n-----END \\1 KEY-----\n?", Pattern.DOTALL);
 
     private static final byte[] RSA_OID = bytes("2a 86 48 86 f7 0d 01 01 01");
     private static final byte[] EC_OID = bytes("2a 86 48 ce 3d 02 01");
@@ -49,25 +51,45 @@ public class CryptoParser {
         if (!matcher.matches()) throw new IllegalArgumentException("bad or unsupported PEM encoding: " + keyString);
         String algorithm = matcher.group(2);
         String keyType = matcher.group(3);
-        String keyBytesString = matcher.group(4);
+        String rawKeyBytesString = matcher.group(4);
 
-        byte[] keyBytes;
+        byte[] rawKeyBytes = decodeBase64(rawKeyBytesString);
+
+        byte[] pkcs8KeyBytes;
         KeyFactory keyFactory;
         if (algorithm == null) {
-            keyBytes = decodeBase64(keyBytesString);
-            keyFactory = chooseKeyFactory(keyBytes);
+            pkcs8KeyBytes = rawKeyBytes;
+            keyFactory = chooseKeyFactory(pkcs8KeyBytes);
         } else {
-            keyBytes = PKCS8.wrap(Arrays.asList(RSA_OID), decodeBase64(keyBytesString));
-            keyFactory = RSAKeyFactory.INSTANCE;
+            List<byte[]> algorithmOids;
+            switch (algorithm) {
+                case "RSA":
+                    algorithmOids = Arrays.asList(RSA_OID);
+                    keyFactory = RSAKeyFactory.INSTANCE;
+                    break;
+                case "EC":
+                    byte[] ecDomainParameters;
+                    try {
+                        ecDomainParameters = DERInputStream.fromBytes(rawKeyBytes, CryptoParser::ecDomainParameters);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException("could not determine EC domain parameters: " + keyString, e);
+                    }
+                    algorithmOids = Arrays.asList(EC_OID, ecDomainParameters);
+                    keyFactory = ECKeyFactory.INSTANCE;
+                    break;
+                default:
+                    throw new IllegalArgumentException("unsupported algorithm: " + algorithm);
+            }
+            pkcs8KeyBytes = PKCS8.wrap(algorithmOids, rawKeyBytes);
         }
 
         if (keyFactory == null) throw new IllegalArgumentException("unsupported algorithm: " + keyString);
 
         switch (keyType) {
             case "PUBLIC":
-                return keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
+                return keyFactory.generatePublic(new X509EncodedKeySpec(pkcs8KeyBytes));
             case "PRIVATE":
-                return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
+                return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(pkcs8KeyBytes));
             default:
                 throw new IllegalArgumentException("unsupported key type: " + keyString);
         }
@@ -85,6 +107,15 @@ public class CryptoParser {
         else return null;
     }
 
+    private static byte[] ecDomainParameters(DERInputStream in) throws IOException {
+        // as per RFC 5915
+        in.readSequenceStart();
+        in.readInteger(); // version
+        in.readOctetString(); // private key
+        in.readConstructedStart(DERTags.TAG_EC_PARAMETERS); // parameters
+        return in.readObjectID();
+    }
+
     private static boolean contains(byte[] haystack, byte[] needle) {
         bytes:
         for (int i = 0; i <= haystack.length - needle.length; i++) {
@@ -95,4 +126,5 @@ public class CryptoParser {
         }
         return false;
     }
+
 }
