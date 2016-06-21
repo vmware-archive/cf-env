@@ -12,7 +12,6 @@ import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.regex.Matcher;
@@ -52,29 +51,18 @@ public class CryptoParser {
         Matcher matcher = KEY_PATTERN.matcher(keyString);
         if (!matcher.matches()) throw new IllegalArgumentException("bad or unsupported PEM encoding: " + keyString);
         String algorithm = matcher.group(2);
-        String keyType = matcher.group(3);
+        String keySenseString = matcher.group(3);
         String rawKeyBytesString = matcher.group(4);
 
-        byte[] rawKeyBytes = decodeBase64(rawKeyBytesString);
+        KeySense keySense = KeySense.valueOf(keySenseString);
 
-        boolean publicKey;
-        switch (keyType) {
-            case "PUBLIC":
-                publicKey = true;
-                break;
-            case "PRIVATE":
-                publicKey = false;
-                break;
-            default:
-                throw new IllegalArgumentException("unsupported key type: " + keyString);
-        }
+        byte[] rawKeyBytes = decodeBase64(rawKeyBytesString);
 
         KeyFactory keyFactory;
         KeySpec spec;
         if (algorithm == null) {
             keyFactory = chooseKeyFactory(rawKeyBytes);
-            if (publicKey) spec = new X509EncodedKeySpec(rawKeyBytes);
-            else spec = new PKCS8EncodedKeySpec(rawKeyBytes);
+            spec = keySense.nativeSpec(rawKeyBytes);
         } else {
             try {
                 switch (algorithm) {
@@ -100,8 +88,7 @@ public class CryptoParser {
 
         if (keyFactory == null) throw new IllegalArgumentException("unsupported algorithm: " + keyString);
 
-        if (publicKey) return keyFactory.generatePublic(spec);
-        else return keyFactory.generatePrivate(spec);
+        return keySense.generate(keyFactory, spec);
     }
 
     private static byte[] decodeBase64(String keyBytesString) {
