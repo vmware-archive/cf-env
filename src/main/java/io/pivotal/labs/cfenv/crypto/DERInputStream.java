@@ -5,6 +5,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.math.BigInteger;
 
 public class DERInputStream extends PushbackInputStream {
 
@@ -41,6 +42,12 @@ public class DERInputStream extends PushbackInputStream {
             default:
                 throw new IOException("length too long: " + length);
         }
+    }
+
+    public BigInteger readBigInteger() throws IOException {
+        readTag(DERTags.TAG_INTEGER);
+        int length = readLength();
+        return new BigInteger(readFully(length));
     }
 
     public byte[] readOctetString() throws IOException {

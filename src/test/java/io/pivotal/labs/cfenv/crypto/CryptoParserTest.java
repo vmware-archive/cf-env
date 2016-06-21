@@ -194,4 +194,21 @@ public class CryptoParserTest {
         assertThat(((ECPrivateKey) key).getS(), hasToString(startsWith("5110140315")));
     }
 
+    @Test
+    public void shouldParseAPKCS1DSAPrivateKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN DSA PRIVATE KEY-----\n" +
+                "MIH5AgEAAkEA/8/aIwYwD4TUzee5AQvz4Bk24nAozkCJOOK/WEtLmlfdK3pWeZ7W\n" +
+                "ttD65kJFgFZE1hDi0D0ipuXwFIJhqzoMcQIVAORLzKnx1wfBs3Mngrh3XfyqOmUl\n" +
+                "AkEAvjDa+zB5mfAfIaYOgpuJzEGnLnj9VGLZEGVC/w3l5ML3PblMCLMniHzIT3UQ\n" +
+                "jQtTwOfiWa7RdAFrmjU7OQxJCQJBALhjbXYy4uG3yMV+h/Sd6SgxqgDr17n1dk2Q\n" +
+                "H2r/4sMppgtMgCLNvb/3kuvK8novAEaHDEojWUkwtsSrsgXFLacCFARPJrGexYk7\n" +
+                "b3cNk+Qay5BqrbF3\n" +
+                "-----END DSA PRIVATE KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((DSAPrivateKey) key).getX(), hasToString(startsWith("2460109266")));
+    }
+
 }
