@@ -129,6 +129,8 @@ public class DEROutputStream extends FilterOutputStream {
             throw new IllegalArgumentException();
         } else if (length < 128) {
             writeShortLength(length);
+        } else if (length < 1 << 8) {
+            writeLongLength(sliceByte(length, 0));
         } else if (length < 1 << 16) {
             writeLongLength(sliceByte(length, 1), sliceByte(length, 0));
         } else if (length < 1 << 24) {
