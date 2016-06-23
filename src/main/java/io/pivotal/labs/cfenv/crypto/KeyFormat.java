@@ -36,7 +36,7 @@ public enum KeyFormat {
 
         @Override
         public KeySpec parsePublicKey(KeyAlgorithm algorithm, byte[] keyBytes) throws IOException {
-            throw new UnsupportedOperationException();
+            return algorithm.parseLegacyPublicKey(keyBytes);
         }
 
         @Override

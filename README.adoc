@@ -78,6 +78,8 @@ openssl req -newkey 512 -subj /OU=IAmAService -nodes -keyout service_rsa.key -ou
 openssl x509 -req -in service_rsa.csr -CAkey ca.key -CA ca.crt -CAcreateserial -out service_rsa.crt
 openssl pkcs8 -topk8 -in service_rsa.key -nocrypt -out service_rsa.key8
 openssl pkey -in service_rsa.key -pubout -out service_rsa.pub
+chmod go-r service_rsa.key
+ssh-keygen -e -f service_rsa.key -m pem >service_rsa.pub1
 
 # create, sign, and convert to PKCS#8 a service EC key pair
 openssl ecparam -name prime256v1 -genkey -noout -out service_ec.key

@@ -7,6 +7,7 @@ import java.security.KeyFactory;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 
 public enum KeyAlgorithm {
@@ -20,6 +21,16 @@ public enum KeyAlgorithm {
         public KeySpec parseLegacyPrivateKey(byte[] keyBytes) throws IOException {
             return new PKCS8EncodedKeySpec(PKCS8.wrap(Arrays.asList(RSA.oid), keyBytes));
         }
+
+        @Override
+        public KeySpec parseLegacyPublicKey(byte[] keyBytes) throws IOException {
+            return DERInputStream.fromBytes(keyBytes, in -> {
+                in.readSequenceStart();
+                BigInteger modulus = in.readBigInteger();
+                BigInteger publicExponent = in.readBigInteger();
+                return new RSAPublicKeySpec(modulus, publicExponent);
+            });
+        }
     },
     EC("2a 86 48 ce 3d 02 01") {
         @Override
@@ -29,7 +40,7 @@ public enum KeyAlgorithm {
 
         @Override
         public KeySpec parseLegacyPrivateKey(byte[] keyBytes) throws IOException {
-            byte[] ecDomainParameters = DERInputStream.fromBytes(keyBytes, (in) -> {
+            byte[] ecDomainParameters = DERInputStream.fromBytes(keyBytes, in -> {
                 // as per RFC 5915
                 in.readSequenceStart();
                 in.readInteger(); // version
@@ -38,6 +49,11 @@ public enum KeyAlgorithm {
                 return in.readObjectID();
             });
             return new PKCS8EncodedKeySpec(PKCS8.wrap(Arrays.asList(EC.oid, ecDomainParameters), keyBytes));
+        }
+
+        @Override
+        public KeySpec parseLegacyPublicKey(byte[] keyBytes) throws IOException {
+            throw new UnsupportedOperationException();
         }
     },
     DSA("2a 86 48 ce 38 04 01") {
@@ -59,6 +75,11 @@ public enum KeyAlgorithm {
                 return new DSAPrivateKeySpec(privateKey, prime, subprime, base);
             });
         }
+
+        @Override
+        public KeySpec parseLegacyPublicKey(byte[] keyBytes) throws IOException {
+            throw new UnsupportedOperationException();
+        }
     },
     DH("2a 86 48 86 f7 0d 01 03 01") {
         @Override
@@ -69,6 +90,11 @@ public enum KeyAlgorithm {
         @Override
         public KeySpec parseLegacyPrivateKey(byte[] keyBytes) throws IOException {
             throw new IOException("there are no PKCS#1 DH keys");
+        }
+
+        @Override
+        public KeySpec parseLegacyPublicKey(byte[] keyBytes) throws IOException {
+            throw new UnsupportedOperationException();
         }
     };
 
@@ -103,4 +129,5 @@ public enum KeyAlgorithm {
 
     public abstract KeySpec parseLegacyPrivateKey(byte[] keyBytes) throws IOException;
 
+    public abstract KeySpec parseLegacyPublicKey(byte[] keyBytes) throws IOException;
 }

@@ -211,4 +211,16 @@ public class CryptoParserTest {
         assertThat(((DSAPrivateKey) key).getX(), hasToString(startsWith("2460109266")));
     }
 
+    @Test
+    public void shouldParseAPKCS1RSAPublicKey() throws Exception {
+        String keyString = "" +
+                "-----BEGIN RSA PUBLIC KEY-----\n" +
+                "MEgCQQDmpRYzTLitBBZl2vUPhvGKrWNkfU1K5ifbUsCmcOe35Dj8JDj84h2H+FmW\n" +
+                "OAUqrWgmDhOh4O5sK1IvJHcvz2oPAgMBAAE=\n" +
+                "-----END RSA PUBLIC KEY-----";
+
+        Key key = CryptoParser.parseKey(keyString);
+
+        assertThat(((RSAPublicKey) key).getPublicExponent(), hasToString(startsWith("65537")));
+    }
 }
