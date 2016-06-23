@@ -57,6 +57,7 @@ public class CryptoParserTest {
         Key key = CryptoParser.parseKey(keyString);
 
         assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("8571299855")));
+        assertThat(((RSAPrivateKey) key).getModulus(), hasToString(startsWith("1207985201")));
     }
 
     @Test
@@ -178,6 +179,7 @@ public class CryptoParserTest {
         Key key = CryptoParser.parseKey(keyString);
 
         assertThat(((RSAPrivateKey) key).getPrivateExponent(), hasToString(startsWith("8571299855")));
+        assertThat(((RSAPrivateKey) key).getModulus(), hasToString(startsWith("1207985201")));
     }
 
     @Test

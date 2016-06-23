@@ -7,6 +7,7 @@ import java.security.KeyFactory;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 
@@ -19,7 +20,15 @@ public enum KeyAlgorithm {
 
         @Override
         public KeySpec parseLegacyPrivateKey(byte[] keyBytes) throws IOException {
-            return new PKCS8EncodedKeySpec(PKCS8.wrap(Arrays.asList(RSA.oid), keyBytes));
+            return DERInputStream.fromBytes(keyBytes, in -> {
+                in.readSequenceStart();
+                int version = in.readInteger();
+                if (version != 0) throw new IOException("unsupported version: " + version);
+                BigInteger modulus = in.readBigInteger();
+                in.readBigInteger();
+                BigInteger privateExponent = in.readBigInteger();
+                return new RSAPrivateKeySpec(modulus, privateExponent);
+            });
         }
 
         @Override
