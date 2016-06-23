@@ -9,7 +9,6 @@ import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Arrays;
 
 public enum KeyAlgorithm {
     RSA("2a 86 48 86 f7 0d 01 01 01") {
@@ -49,7 +48,13 @@ public enum KeyAlgorithm {
 
         @Override
         public KeySpec parseLegacyPrivateKey(byte[] keyBytes) throws IOException {
-            byte[] ecDomainParameters = DERInputStream.fromBytes(keyBytes, in -> {
+            byte[] curveId = determineCurveId(keyBytes);
+            // we can't create an ECPrivateKeySpec directly, because we'd need to know the parameters for all the curves
+            return new PKCS8EncodedKeySpec(formatAsPkcs8(curveId, keyBytes));
+        }
+
+        private byte[] determineCurveId(byte[] keyBytes) throws IOException {
+            return DERInputStream.fromBytes(keyBytes, in -> {
                 // as per RFC 5915
                 in.readSequenceStart();
                 in.readInteger(); // version
@@ -57,7 +62,22 @@ public enum KeyAlgorithm {
                 in.readConstructedStart(DERTags.TAG_EC_PARAMETERS); // parameters
                 return in.readObjectID();
             });
-            return new PKCS8EncodedKeySpec(PKCS8.wrap(Arrays.asList(EC.oid, ecDomainParameters), keyBytes));
+        }
+
+        private byte[] formatAsPkcs8(byte[] curveId, byte[] keyBytes) {
+            return DEROutputStream.toBytes(out -> {
+                int pkcs8Version = 0;
+
+                int algorithmIdLength = DEROutputStream.measureObjectID(oid);
+                int curveIdLength = DEROutputStream.measureObjectID(curveId);
+
+                out.writeSequenceStart(DEROutputStream.measureInteger(pkcs8Version), DEROutputStream.measureSequence(algorithmIdLength, curveIdLength), DEROutputStream.measureOctetString(keyBytes));
+                out.writeInteger(pkcs8Version);
+                out.writeSequenceStart(algorithmIdLength, curveIdLength);
+                out.writeObjectID(oid);
+                out.writeObjectID(curveId);
+                out.writeOctetString(keyBytes);
+            });
         }
 
         @Override
@@ -126,7 +146,7 @@ public enum KeyAlgorithm {
         return false;
     }
 
-    private final byte[] oid;
+    protected final byte[] oid;
     private final byte[] signature;
 
     KeyAlgorithm(String oid) {

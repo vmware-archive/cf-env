@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
+import java.math.BigInteger;
 import java.security.Key;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -18,6 +19,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class CryptoParserTest {
+
+    public static final BigInteger P_256_ORDER = new BigInteger("115792089210356248762697446949407573529996955224135760342422259061068512044369");
 
     @Test
     public void shouldParseAnX509Certificate() throws Exception {
@@ -72,6 +75,7 @@ public class CryptoParserTest {
         Key key = CryptoParser.parseKey(keyString);
 
         assertThat(((ECPrivateKey) key).getS(), hasToString(startsWith("5110140315")));
+        assertThat(((ECPrivateKey) key).getParams().getOrder(), equalTo(P_256_ORDER));
     }
 
     @Test
@@ -194,6 +198,7 @@ public class CryptoParserTest {
         Key key = CryptoParser.parseKey(keyString);
 
         assertThat(((ECPrivateKey) key).getS(), hasToString(startsWith("5110140315")));
+        assertThat(((ECPrivateKey) key).getParams().getOrder(), equalTo(P_256_ORDER));
     }
 
     @Test
