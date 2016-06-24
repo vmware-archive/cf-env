@@ -2,11 +2,14 @@ This is a small Java library for parsing the Cloud Foundry environment variables
 
 // the first line of this file is used as a description in the POM, so keep it short and sweet!
 
-Download from Bintray:
+Using it
+========
+
+Download it from Bintray:
 
 image::https://api.bintray.com/packages/pivotal-labs-london/maven/cf-env/images/download.svg[link="https://bintray.com/pivotal-labs-london/maven/cf-env/_latestVersion"]
 
-Use as a dependency in your build:
+Or use it as a dependency in your build:
 
 --------------------------------------
 repositories {
@@ -18,9 +21,12 @@ dependencies {
 }
 --------------------------------------
 
-Incorporate into your application:
+Incorporate it into your application:
 
 --------------------------------------
+import io.pivotal.labs.cfenv.CloudFoundryEnvironment;
+import io.pivotal.labs.cfenv.CloudFoundryService;
+
 @WebServlet("/ini")
 public class ServicesAsIniFileServlet extends HttpServlet {
     @Override
@@ -51,13 +57,18 @@ public class ServicesAsIniFileServlet extends HttpServlet {
 }
 --------------------------------------
 
-Build with Gradle:
+Most of the interesting methods are on the `CloudFoundryService` class, so have a look at that.
+
+Developing it
+=============
+
+Build it with Gradle:
 
 --------------------------------------
 ./gradlew build
 --------------------------------------
 
-Release with Gradle:
+Release it with Gradle:
 
 --------------------------------------
 # you probably want to make these changes manually rather than like this
