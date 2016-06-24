@@ -1,6 +1,8 @@
-This is a small Java library for parsing the Cloud Foundry environment variables (VCAP_SERVICES and so on).
+A small library for parsing the Cloud Foundry environment variables.
 
 // the first line of this file is used as a description in the POM, so keep it short and sweet!
+
+Cloud Foundry https://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html[defines a number of environment variables], but at the moment, we only parse https://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html#VCAP-SERVICES[`VCAP_SERVICES`]. We list the bound services by name, exposing the metadata and credentials for each, and provide convenient access to any SSL keys and certificates encoded in the credentials.
 
 Using it
 ========

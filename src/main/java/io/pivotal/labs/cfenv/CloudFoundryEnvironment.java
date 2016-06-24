@@ -11,13 +11,22 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * An environment in which there is a set of uniquely named services, described by a https://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html#VCAP-SERVICES[`VCAP_SERVICES`] environment variable.
+ */
 public class CloudFoundryEnvironment {
 
-    public static final String VCAP_SERVICES = "VCAP_SERVICES";
+    private static final String VCAP_SERVICES = "VCAP_SERVICES";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final Map<String, CloudFoundryService> services;
 
+    /**
+     * Creates a new environment.
+     *
+     * @param environment the underlying environment from which to obtain the environment variables
+     * @throws CloudFoundryEnvironmentException if any of the necessary variables are missing or malformed
+     */
     public CloudFoundryEnvironment(Environment environment) throws CloudFoundryEnvironmentException {
         String vcapServices = environment.lookup(VCAP_SERVICES);
 
@@ -71,7 +80,14 @@ public class CloudFoundryEnvironment {
         return services.keySet();
     }
 
-    public CloudFoundryService getService(String serviceName) {
+    /**
+     * Gets information about a particular service by name.
+     *
+     * @param serviceName the name of the service to get
+     * @return information about the service with the given name
+     * @throws NoSuchElementException if there is no service with the given name
+     */
+    public CloudFoundryService getService(String serviceName) throws NoSuchElementException {
         CloudFoundryService service = services.get(serviceName);
         if (service == null) throw new NoSuchElementException("no such service: " + serviceName);
         return service;
