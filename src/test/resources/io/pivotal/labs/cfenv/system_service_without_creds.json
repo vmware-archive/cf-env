@@ -1,0 +1,15 @@
+{
+  "lionlogger": [
+    {
+      "credentials": null,
+      "label": "foo-service",
+      "name": "myapp-logger",
+      "plan": "spider",
+      "tags": [
+        "Logging",
+        "Cool Service",
+        "Developer Tools"
+      ]
+    }
+  ]
+}

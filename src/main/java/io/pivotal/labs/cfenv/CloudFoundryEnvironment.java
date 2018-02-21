@@ -1,5 +1,6 @@
 package io.pivotal.labs.cfenv;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -17,7 +18,9 @@ import java.util.stream.Collectors;
 public class CloudFoundryEnvironment {
 
     private static final String VCAP_SERVICES = "VCAP_SERVICES";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER =
+            new ObjectMapper()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     private final Map<String, CloudFoundryService> services;
 
@@ -55,8 +58,13 @@ public class CloudFoundryEnvironment {
         Set<String> tags = asCollection(serviceInstanceNode.get("tags")).stream()
                 .map(String.class::cast)
                 .collect(Collectors.toSet());
-        Map<String, Object> credentials = castKeysToString(asMap(serviceInstanceNode.get("credentials")));
-        return new CloudFoundryService(name, label, plan, tags, credentials);
+
+        Map credentials = asMap(serviceInstanceNode.get("credentials"));
+        if (credentials == null) {
+            credentials = new HashMap<>();
+        }
+
+        return new CloudFoundryService(name, label, plan, tags, castKeysToString(credentials));
     }
 
     private Collection<?> asCollection(Object o) {
