@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.HashMap;
 
 import static io.pivotal.labs.cfenv.EntriesMatcher.entries;
 import static io.pivotal.labs.cfenv.EntriesMatcher.entry;
@@ -37,6 +38,16 @@ public class CloudFoundryEnvironmentTests {
         Set<String> serviceNames = environment.getServiceNames();
 
         assertThat(serviceNames, contains("myapp-db"));
+    }
+
+    @Test
+    public void shouldParseEnvWithoutCredentials() throws Exception {
+        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(TestEnvironment.withVcapServicesFrom("system_service_without_creds.json"));
+        Set<String> serviceNames = environment.getServiceNames();
+
+        assertThat(serviceNames, contains("myapp-logger"));
+        CloudFoundryService service = environment.getService("myapp-logger");
+        assertThat(service.getCredentials(), is(new HashMap<>()));
     }
 
     @Test
